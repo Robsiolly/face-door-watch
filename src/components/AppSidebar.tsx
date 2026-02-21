@@ -45,7 +45,7 @@ export function AppSidebar() {
         </div>
         {!collapsed && (
           <div className="overflow-hidden">
-            <h1 className="text-sm font-bold text-foreground tracking-tight">PortarIA</h1>
+            <h1 className="text-sm font-bold text-foreground tracking-tight">OTREBOR</h1>
             <p className="text-[10px] text-muted-foreground">Portaria Inteligente</p>
           </div>
         )}
