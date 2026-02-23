@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, PackageCheck, MessageCircle } from "lucide-react";
+import { Plus, Edit, Trash2, PackageCheck, MessageCircle, Check } from "lucide-react";
 import { useAppData, Encomenda } from "@/contexts/AppDataContext";
 import { usePeople } from "@/contexts/PeopleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -41,6 +41,20 @@ const Encomendas = () => {
     }
     setIsOpen(true);
   };
+
+  // Associação automática: Busca morador por Bloco/Apto
+  useEffect(() => {
+    if (formData.bloco && formData.apto && !editingEncomenda) {
+      const found = people.find(p =>
+        p.type === 'morador' &&
+        p.bloco === formData.bloco &&
+        p.apartamento === formData.apto
+      );
+      if (found && found.nome !== formData.morador) {
+        setFormData(prev => ({ ...prev, morador: found.nome }));
+      }
+    }
+  }, [formData.bloco, formData.apto, people, editingEncomenda]);
 
   const handleSave = async () => {
     if (!formData.morador || !formData.descricao) {
@@ -176,7 +190,14 @@ const Encomendas = () => {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Nome do Morador</Label>
+              <div className="flex justify-between items-end">
+                <Label>Nome do Morador</Label>
+                {formData.bloco && formData.apto && people.find(p => p.type === 'morador' && p.bloco === formData.bloco && p.apartamento === formData.apto) && (
+                  <span className="text-[10px] text-green-600 font-bold flex items-center gap-1 animate-in fade-in zoom-in">
+                    <Check className="w-3 h-3" /> MORADOR LOCALIZADO
+                  </span>
+                )}
+              </div>
               <Input value={formData.morador || ""} onChange={e => setFormData({ ...formData, morador: e.target.value })} placeholder="Ex: João Silva" />
             </div>
             <div className="grid grid-cols-2 gap-4">
