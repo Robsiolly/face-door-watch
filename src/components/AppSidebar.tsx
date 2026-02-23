@@ -32,7 +32,12 @@ const navItems = [
   { title: "Configurações", url: "/configuracoes", icon: Settings, roles: ['portaria', 'admin'] },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  onNavItemClick?: () => void;
+  isDrawer?: boolean;
+}
+
+export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuth();
 
