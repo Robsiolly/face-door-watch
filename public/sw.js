@@ -14,9 +14,28 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Estratégia Network First (Tenta rede, se falhar vai pro cache)
+    // Isso é mais seguro para evitar telas pretas por cache corrompido ou antigo
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
+        fetch(event.request)
+            .then((response) => {
+                // Opcional: atualizar o cache com a nova resposta
+                return response;
+            })
+            .catch(() => {
+                return caches.match(event.request);
+            })
+    );
+});
+
+// Limpar caches antigos
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.filter((name) => name !== CACHE_NAME)
+                    .map((name) => caches.delete(name))
+            );
         })
     );
 });
