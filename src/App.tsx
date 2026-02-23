@@ -14,29 +14,52 @@ import Ocorrencias from "./pages/Ocorrencias";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
+import { PeopleProvider } from "./contexts/PeopleContext";
+import { AppDataProvider } from "./contexts/AppDataContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: string[] }) => {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated) return <Login />;
+
+  if (roles && user && !roles.includes(user.role)) {
+    return <Index />; // Ou uma página de acesso negado
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/portaria" element={<Portaria />} />
-          <Route path="/moradores" element={<Moradores />} />
-          <Route path="/visitantes" element={<Visitantes />} />
-          <Route path="/prestadores" element={<Prestadores />} />
-          <Route path="/veiculos" element={<Veiculos />} />
-          <Route path="/encomendas" element={<Encomendas />} />
-          <Route path="/ocorrencias" element={<Ocorrencias />} />
-          <Route path="/relatorios" element={<Relatorios />} />
-          <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <PeopleProvider>
+          <AppDataProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/portaria" element={<ProtectedRoute roles={['portaria', 'admin']}><Portaria /></ProtectedRoute>} />
+                <Route path="/moradores" element={<ProtectedRoute roles={['portaria', 'admin']}><Moradores /></ProtectedRoute>} />
+                <Route path="/visitantes" element={<ProtectedRoute roles={['portaria', 'admin']}><Visitantes /></ProtectedRoute>} />
+                <Route path="/prestadores" element={<ProtectedRoute roles={['portaria', 'admin']}><Prestadores /></ProtectedRoute>} />
+                <Route path="/veiculos" element={<ProtectedRoute roles={['portaria', 'admin']}><Veiculos /></ProtectedRoute>} />
+                <Route path="/encomendas" element={<ProtectedRoute><Encomendas /></ProtectedRoute>} />
+                <Route path="/ocorrencias" element={<ProtectedRoute><Ocorrencias /></ProtectedRoute>} />
+                <Route path="/relatorios" element={<ProtectedRoute roles={['portaria', 'admin']}><Relatorios /></ProtectedRoute>} />
+                <Route path="/configuracoes" element={<ProtectedRoute roles={['portaria', 'admin']}><Configuracoes /></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AppDataProvider>
+        </PeopleProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -24,13 +24,13 @@ import {
 } from "recharts";
 
 const accessData = [
-  { dia: "15/02", moradores: 120, visitantes: 35, prestadores: 12 },
-  { dia: "16/02", moradores: 135, visitantes: 28, prestadores: 8 },
-  { dia: "17/02", moradores: 110, visitantes: 42, prestadores: 15 },
-  { dia: "18/02", moradores: 145, visitantes: 30, prestadores: 10 },
-  { dia: "19/02", moradores: 130, visitantes: 38, prestadores: 20 },
-  { dia: "20/02", moradores: 80, visitantes: 15, prestadores: 5 },
-  { dia: "21/02", moradores: 95, visitantes: 22, prestadores: 8 },
+  { dia: "15/02", moradores: 0, visitantes: 0, prestadores: 0 },
+  { dia: "16/02", moradores: 0, visitantes: 0, prestadores: 0 },
+  { dia: "17/02", moradores: 0, visitantes: 0, prestadores: 0 },
+  { dia: "18/02", moradores: 0, visitantes: 0, prestadores: 0 },
+  { dia: "19/02", moradores: 0, visitantes: 0, prestadores: 0 },
+  { dia: "20/02", moradores: 0, visitantes: 0, prestadores: 0 },
+  { dia: "21/02", moradores: 0, visitantes: 0, prestadores: 0 },
 ];
 
 const tooltipStyle = {

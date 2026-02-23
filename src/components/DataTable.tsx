@@ -10,6 +10,7 @@ interface DataTableProps<T> {
   actions?: (item: T) => ReactNode;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function DataTable<T extends Record<string, any>>({
   data,
   columns,
@@ -53,7 +54,7 @@ export function DataTable<T extends Record<string, any>>({
               <tr key={i} className="hover:bg-secondary/30 transition-colors">
                 {columns.map((col) => (
                   <td key={col.key} className="px-4 py-3 text-sm">
-                    {col.render ? col.render(item) : item[col.key]}
+                    {col.render ? col.render(item) : (item[col.key] as ReactNode)}
                   </td>
                 ))}
                 {actions && <td className="px-4 py-3 text-right">{actions(item)}</td>}

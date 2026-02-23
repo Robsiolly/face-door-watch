@@ -14,14 +14,9 @@ import {
   Save,
 } from "lucide-react";
 
-const cameras = [
-  { nome: "Entrada Principal", localizacao: "Portaria", tipo: "IP", status: "active" as const },
-  { nome: "Garagem", localizacao: "Subsolo", tipo: "IP", status: "active" as const },
-  { nome: "Área de Lazer", localizacao: "Térreo", tipo: "IP", status: "inactive" as const },
-  { nome: "Elevador Bloco A", localizacao: "Bloco A", tipo: "IP", status: "active" as const },
-];
+const cameras: Array<{ nome: string, localizacao: string, tipo: string, status: "active" | "inactive" }> = [];
 
-const Section = ({ icon: Icon, title, children }: { icon: any; title: string; children: React.ReactNode }) => (
+const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
   <div className="glass-card p-5 mb-4">
     <div className="flex items-center gap-2 mb-4">
       <Icon className="w-4 h-4 text-primary" />
@@ -45,15 +40,15 @@ const Configuracoes = () => (
           <div className="space-y-4">
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5 block">Nome do Condomínio</Label>
-              <Input defaultValue="Residencial Park Tower" className="bg-secondary/50 border-border/50 rounded-xl h-10" />
+              <Input defaultValue="" placeholder="Meu Condomínio" className="bg-secondary/50 border-border/50 rounded-xl h-10" />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5 block">CNPJ</Label>
-              <Input defaultValue="12.345.678/0001-90" className="bg-secondary/50 border-border/50 rounded-xl h-10" />
+              <Input defaultValue="" placeholder="00.000.000/0000-00" className="bg-secondary/50 border-border/50 rounded-xl h-10" />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5 block">Endereço</Label>
-              <Input defaultValue="Rua das Flores, 123 - São Paulo, SP" className="bg-secondary/50 border-border/50 rounded-xl h-10" />
+              <Input defaultValue="" placeholder="Endereço" className="bg-secondary/50 border-border/50 rounded-xl h-10" />
             </div>
           </div>
         </Section>
@@ -104,11 +99,11 @@ const Configuracoes = () => (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-secondary/50 rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold text-primary">156</p>
+                <p className="text-2xl font-bold text-primary">0</p>
                 <p className="text-xs text-muted-foreground">Pessoas Cadastradas</p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold text-foreground">97.8%</p>
+                <p className="text-2xl font-bold text-foreground">0%</p>
                 <p className="text-xs text-muted-foreground">Taxa de Reconhecimento</p>
               </div>
             </div>
