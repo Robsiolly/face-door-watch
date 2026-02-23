@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, Camera, Eye, ScanFace } from "lucide-react";
+import { Plus, Edit, Trash2, Camera, Eye, ScanFace, MessageCircle } from "lucide-react";
 import { usePeople } from "@/contexts/PeopleContext";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import { AccessControlModal } from "@/components/AccessControlModal";
@@ -37,6 +37,28 @@ const Moradores = () => {
   const handleCloseReg = () => {
     setIsRegOpen(false);
     setEditingPerson(undefined);
+  };
+
+  const sendWhatsAppInvite = (person: Person) => {
+    if (!person.telefone) {
+      toast({
+        title: "Telefone não encontrado",
+        description: "Este morador não possui telefone cadastrado.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const b = person.bloco || '';
+    const a = person.apartamento || '';
+    const n = encodeURIComponent(person.nome);
+    const magicLink = `${window.location.origin}/?b=${b}&a=${a}&n=${n}`;
+
+    const phone = person.telefone.replace(/\D/g, '');
+    const message = `Olá ${person.nome}! Este é o seu link de acesso exclusivo para o app Otrebor Watch: ${magicLink}\n\nCom ele você poderá receber notificações de encomendas e visitantes em tempo real.`;
+    const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, '_blank');
   };
 
   const columns = [
@@ -100,6 +122,15 @@ const Moradores = () => {
         searchPlaceholder="Buscar morador..."
         actions={(item: Person) => (
           <div className="flex items-center gap-1 justify-end">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-green-500 hover:text-green-600 hover:bg-green-50"
+              onClick={() => sendWhatsAppInvite(item)}
+              title="Convidar via WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
