@@ -67,10 +67,6 @@ const Encomendas = () => {
         target_user: target
       });
 
-      // Abrir WhatsApp automaticamente (Opção 1)
-      setTimeout(() => {
-        sendWhatsApp(formData as Encomenda);
-      }, 500);
     }
     setIsOpen(false);
   };
@@ -204,6 +200,13 @@ const Encomendas = () => {
           </div>
           <div className="flex justify-end gap-3 mt-4">
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
+            <Button
+              variant="outline"
+              className="text-green-600 border-green-200 hover:bg-green-50 gap-2"
+              onClick={() => sendWhatsApp(formData as Encomenda)}
+            >
+              <MessageCircle className="w-4 h-4" /> Notificar WhatsApp
+            </Button>
             <Button onClick={handleSave}>Salvar</Button>
           </div>
         </DialogContent>
