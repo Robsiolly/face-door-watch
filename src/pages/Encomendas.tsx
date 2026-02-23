@@ -61,8 +61,8 @@ const Encomendas = () => {
         : undefined;
 
       notificationService.send({
-        title: "Nova Encomenda Disponível",
-        message: `Uma nova encomenda (${formData.descricao}) foi recebida para você.`,
+        title: "Correspondência na Portaria",
+        message: `Olá, há uma correspondência na portaria para você referente a: ${formData.descricao}.`,
         type: 'encomenda',
         target_user: target
       });
