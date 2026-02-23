@@ -77,8 +77,13 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
                 if (v) setVeiculos(v as Veiculo[]);
                 if (e) setEncomendas(e as Encomenda[]);
                 if (o) setOcorrencias(o as Ocorrencia[]);
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Erro ao carregar dados do Supabase:', err);
+                toast({
+                    title: "Erro de Sincronização",
+                    description: "Não foi possível carregar o histórico. Verifique se o RLS está desabilitado no Supabase.",
+                    variant: "destructive"
+                });
             } finally {
                 setIsLoading(false);
             }

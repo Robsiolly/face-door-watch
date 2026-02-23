@@ -25,9 +25,12 @@ const Encomendas = () => {
 
   const isMorador = user?.role === 'morador';
 
-  // Filtrar se for morador
+  // Filtrar se for morador (Normalizando para evitar erros de caixa/espaço)
   const displayData = isMorador
-    ? encomendas.filter(e => e.bloco === user.bloco && e.apto === user.apto)
+    ? encomendas.filter(e =>
+      e.bloco?.toString().toLowerCase().trim() === user.bloco?.toString().toLowerCase().trim() &&
+      e.apto?.toString().toLowerCase().trim() === user.apto?.toString().toLowerCase().trim()
+    )
     : encomendas;
 
   const handleOpen = (encomenda?: Encomenda) => {
