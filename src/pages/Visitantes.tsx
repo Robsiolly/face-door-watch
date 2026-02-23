@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Plus, Camera, History, ScanFace, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Camera, History, ScanFace, Edit, Trash2, Eye, MessageCircle } from "lucide-react";
 import { usePeople } from "@/contexts/PeopleContext";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import { AccessControlModal } from "@/components/AccessControlModal";
@@ -35,6 +35,19 @@ const Visitantes = () => {
   const handleCloseReg = () => {
     setIsRegOpen(false);
     setEditingPerson(undefined);
+  };
+
+  const sendWhatsApp = (person: Person) => {
+    if (!person.telefone) {
+      alert("Telefone não encontrado para este visitante.");
+      return;
+    }
+
+    const phone = person.telefone.replace(/\D/g, '');
+    const message = `Olá ${person.nome}, há uma correspondência na portaria para você. Favor retirar assim que possível.`;
+    const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
+
+    window.location.href = url;
   };
 
   const columns = [
@@ -100,6 +113,15 @@ const Visitantes = () => {
         searchPlaceholder="Buscar visitante..."
         actions={(item: Person) => (
           <div className="flex items-center gap-1 justify-end">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-green-500 hover:text-green-600 hover:bg-green-50"
+              onClick={() => sendWhatsApp(item)}
+              title="Notificar via WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground" onClick={() => handleViewDetails(item)}>
               <Eye className="w-4 h-4" />
             </Button>

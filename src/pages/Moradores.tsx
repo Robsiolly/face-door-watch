@@ -55,7 +55,7 @@ const Moradores = () => {
     const magicLink = `${window.location.origin}/?b=${b}&a=${a}&n=${n}`;
 
     const phone = person.telefone.replace(/\D/g, '');
-    const message = `Olá ${person.nome}! Este é o seu link de acesso exclusivo para o app Otrebor Watch: ${magicLink}\n\nCom ele você poderá receber notificações de encomendas e visitantes em tempo real.`;
+    const message = `Olá ${person.nome}, há uma correspondência na portaria para você. Favor retirar assim que possível.`;
     const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
 
     window.location.href = url;
