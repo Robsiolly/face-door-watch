@@ -25,18 +25,15 @@ export function NotificationCenter() {
         console.log("Iniciando assinatura de notificações para:", user.name);
 
         const filterNotif = (notif: AppNotification) => {
-            if (user.role === 'portaria') return true;
+            const isPortaria = user.role === 'portaria' || user.role === 'admin';
+            if (isPortaria) return true;
 
             if (!notif.target_user) return false;
 
             const myTarget = `${user.bloco}-${user.apto}`.toLowerCase().replace(/\s/g, '');
             const notifTarget = notif.target_user.toLowerCase().replace(/\s/g, '');
 
-            const isMatch = notifTarget === myTarget;
-
-            console.log(`Checando notificação [${notif.title}]: target=${notifTarget}, me=${myTarget}, match=${isMatch}`);
-
-            return isMatch;
+            return notifTarget === myTarget;
         };
 
         // Carregar iniciais
@@ -45,11 +42,16 @@ export function NotificationCenter() {
             setNotifications(filtered);
         });
 
-        // Se inscrever para novas
+        // Se inscrever para novas (passando o usuário para filtro na fonte)
         const subscription = notificationService.subscribe((newNotif) => {
-            console.log("Recebida msg bruta:", newNotif);
+            console.log("Recebida msg filtrada:", newNotif);
+            // Mesmo com filtro na fonte, mantemos aqui por segurança UI
             if (filterNotif(newNotif)) {
-                setNotifications((prev) => [newNotif, ...prev]);
+                setNotifications((prev) => {
+                    // Evitar duplicidade caso a aba atual também tenha enviado
+                    if (prev.find(n => n.id === newNotif.id)) return prev;
+                    return [newNotif, ...prev];
+                });
 
                 toast({
                     title: newNotif.title,
@@ -58,10 +60,24 @@ export function NotificationCenter() {
                 });
 
                 if (typeof Notification !== 'undefined' && Notification.permission === "granted") {
-                    new Notification(newNotif.title, { body: newNotif.message });
+                    // Tenta usar o Service Worker para mostrar a notificação (melhor para mobile)
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.showNotification(newNotif.title, {
+                                body: newNotif.message,
+                                icon: 'https://cdn-icons-png.flaticon.com/512/3662/3662817.png',
+                                badge: 'https://cdn-icons-png.flaticon.com/512/3662/3662817.png',
+                                vibrate: [200, 100, 200],
+                                tag: newNotif.id,
+                                data: { url: window.location.origin + '/encomendas' }
+                            } as any);
+                        });
+                    } else {
+                        new Notification(newNotif.title, { body: newNotif.message });
+                    }
                 }
             }
-        });
+        }, user); // Passa o usuário aqui!
 
         // Pedir permissão
         if (typeof Notification !== 'undefined' && Notification.permission === "default") {

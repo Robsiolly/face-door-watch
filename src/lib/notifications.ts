@@ -1,3 +1,5 @@
+import { supabase } from './supabase';
+
 export interface Notification {
     id: string;
     title: string;
@@ -8,15 +10,22 @@ export interface Notification {
     target_user?: string;
 }
 
-// Canal de comunicação em tempo real entre as abas do navegador
-// Fallback para navegadores que não suportam BroadcastChannel
-const channel = typeof BroadcastChannel !== 'undefined'
-    ? new BroadcastChannel('otrebor_notifications')
-    : {
-        postMessage: () => { },
-        addEventListener: () => { },
-        removeEventListener: () => { },
-    } as any;
+// Normaliza o identificador do alvo (ex: "A-101")
+export const normalizeTarget = (bloco?: string, apto?: string) => {
+    if (!bloco || !apto) return null;
+    return `${bloco}-${apto}`.toLowerCase().replace(/\s/g, '');
+};
+
+// Canal de comunicação em tempo real usando Supabase Broadcast
+const realtimeChannel = supabase.channel('global-notifications', {
+    config: {
+        broadcast: { ack: false },
+    },
+});
+
+realtimeChannel.subscribe((status) => {
+    console.log('Notificações realtime:', status);
+});
 
 export const notificationService = {
     // Salva e envia a notificação
@@ -28,14 +37,18 @@ export const notificationService = {
             read: false
         };
 
-        // Salva no LocalStorage (nosso banco de dados local)
+        // Salva no LocalStorage (nosso banco de dados local da origem)
         const saved = localStorage.getItem('otrebor_notifications');
         const notifications = saved ? JSON.parse(saved) : [];
         notifications.unshift(newNotif);
         localStorage.setItem('otrebor_notifications', JSON.stringify(notifications.slice(0, 50)));
 
-        // "Grita" para as outras abas
-        channel.postMessage(newNotif);
+        // Grita para outros dispositivos usando Supabase Realtime
+        realtimeChannel.send({
+            type: 'broadcast',
+            event: 'new_notification',
+            payload: newNotif
+        });
 
         // Dispara um evento local para a própria aba também saber
         window.dispatchEvent(new CustomEvent('new_notification', { detail: newNotif }));
@@ -67,22 +80,48 @@ export const notificationService = {
         return JSON.parse(saved);
     },
 
-    subscribe(callback: (notification: Notification) => void) {
-        const handleMessage = (event: MessageEvent) => {
-            callback(event.data);
-        };
+    subscribe(callback: (notification: Notification) => void, currentUser?: { role: string, bloco?: string, apto?: string }) {
+        // Escuta mensagens do Supabase (outros dispositivos)
+        const realtimeSubscription = realtimeChannel.on(
+            'broadcast',
+            { event: 'new_notification' },
+            (payload) => {
+                const newNotif = payload.payload as Notification;
+
+                // Filtragem na camada de serviço para não poluir o localStorage de quem não é o alvo
+                if (currentUser) {
+                    const isPortaria = currentUser.role === 'portaria' || currentUser.role === 'admin';
+                    const myTarget = normalizeTarget(currentUser.bloco, currentUser.apto);
+                    const notifTarget = newNotif.target_user ? newNotif.target_user.toLowerCase().replace(/\s/g, '') : null;
+
+                    const isMatch = isPortaria || (notifTarget && notifTarget === myTarget);
+
+                    if (!isMatch) return; // Ignora se não for para mim
+                }
+
+                // Salva também no localStorage desse dispositivo destino
+                const saved = localStorage.getItem('otrebor_notifications');
+                const notifications = saved ? JSON.parse(saved) : [];
+
+                // Evita duplicatas caso seja a mesma aba
+                if (!notifications.find((n: Notification) => n.id === newNotif.id)) {
+                    notifications.unshift(newNotif);
+                    localStorage.setItem('otrebor_notifications', JSON.stringify(notifications.slice(0, 50)));
+                    callback(newNotif);
+                }
+            }
+        );
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handleLocal = (event: any) => {
             callback(event.detail);
         };
 
-        channel.addEventListener('message', handleMessage);
         window.addEventListener('new_notification', handleLocal);
 
         return {
             unsubscribe: () => {
-                channel.removeEventListener('message', handleMessage);
+                realtimeSubscription.unsubscribe();
                 window.removeEventListener('new_notification', handleLocal);
             }
         };

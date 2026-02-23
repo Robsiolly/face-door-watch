@@ -54,11 +54,15 @@ const Encomendas = () => {
       toast({ title: "Sucesso", description: "Encomenda registrada!" });
 
       // Notify resident
+      const target = (formData.bloco && formData.apto)
+        ? `${formData.bloco}-${formData.apto}`.toLowerCase().replace(/\s/g, '')
+        : undefined;
+
       notificationService.send({
         title: "Nova Encomenda Disponível",
         message: `Uma nova encomenda (${formData.descricao}) foi recebida para você.`,
         type: 'encomenda',
-        target_user: `${formData.bloco}-${formData.apto}`
+        target_user: target
       });
     }
     setIsOpen(false);

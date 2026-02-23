@@ -70,11 +70,15 @@ const Ocorrencias = () => {
       toast({ title: "Sucesso", description: "Ocorrência registrada!" });
 
       // Notify relevant parties
+      const target = (formData.bloco && formData.apto)
+        ? `${formData.bloco}-${formData.apto}`.toLowerCase().replace(/\s/g, '')
+        : undefined;
+
       notificationService.send({
         title: `Nova Ocorrência: ${formData.tipo}`,
         message: formData.descricao || "",
         type: 'ocorrencia',
-        target_user: formData.apto ? `${formData.bloco}-${formData.apto}` : undefined
+        target_user: target
       });
     }
     setIsOpen(false);
