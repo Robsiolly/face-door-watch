@@ -9,11 +9,13 @@ import { usePeople } from "@/contexts/PeopleContext";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import { AccessControlModal } from "@/components/AccessControlModal";
 import { PersonDetailsModal } from "@/components/PersonDetailsModal";
+import { useToast } from "@/components/ui/use-toast";
 
 import { Person } from "@/contexts/PeopleContext";
 
 const Moradores = () => {
   const { getPeopleByType, deletePerson } = usePeople();
+  const { toast } = useToast();
   const data = getPeopleByType("morador");
 
   const [isRegOpen, setIsRegOpen] = useState(false);
@@ -98,6 +100,19 @@ const Moradores = () => {
         searchPlaceholder="Buscar morador..."
         actions={(item: Person) => (
           <div className="flex items-center gap-1 justify-end">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10"
+              title="Copiar Link de Acesso"
+              onClick={() => {
+                const url = `${window.location.origin}/?b=${item.bloco || ''}&a=${item.apartamento || ''}&n=${encodeURIComponent(item.nome)}`;
+                navigator.clipboard.writeText(url);
+                toast({ title: "Link Copiado!", description: `Link de acesso para ${item.nome} pronto para envio.` });
+              }}
+            >
+              <Plus className="w-4 h-4 rotate-45" />
+            </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground" onClick={() => handleViewDetails(item)}>
               <Eye className="w-4 h-4" />
             </Button>

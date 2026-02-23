@@ -32,6 +32,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 console.error("Failed to load user", e);
             }
         }
+
+        // Check for URL parameters (Magic Link)
+        const params = new URLSearchParams(window.location.search);
+        const b = params.get('b');
+        const a = params.get('a');
+        const n = params.get('n');
+
+        if (b && a) {
+            const newUser: User = {
+                id: Math.random().toString(36).substr(2, 9),
+                name: n || `Morador ${b}-${a}`,
+                role: 'morador',
+                bloco: b,
+                apto: a
+            };
+            setUser(newUser);
+            localStorage.setItem('otrebor_user', JSON.stringify(newUser));
+            // Clear params from URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         setIsLoaded(true);
     }, []);
 
