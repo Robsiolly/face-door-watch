@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, PackageCheck, MessageCircle, Check } from "lucide-react";
+import { Plus, Edit, Trash2, PackageCheck, MessageCircle, Check, Phone } from "lucide-react";
 import { useAppData, Encomenda } from "@/contexts/AppDataContext";
 import { usePeople } from "@/contexts/PeopleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -210,6 +210,19 @@ const Encomendas = () => {
                 <Input value={formData.apto || ""} onChange={e => setFormData({ ...formData, apto: e.target.value })} />
               </div>
             </div>
+
+            {/* Exibição automática do telefone */}
+            {formData.bloco && formData.apto && (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                <Label className="text-xs text-muted-foreground italic">Telefone Associado</Label>
+                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/10 rounded-xl">
+                  <Phone className="w-4 h-4 text-primary" />
+                  <span className="font-semibold text-sm">
+                    {people.find(p => p.type === 'morador' && p.bloco === formData.bloco && p.apartamento === formData.apto)?.telefone || "Telefone não cadastrado"}
+                  </span>
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Descrição / Volume</Label>
               <Input value={formData.descricao || ""} onChange={e => setFormData({ ...formData, descricao: e.target.value })} placeholder="Ex: Caixa Amazon, iFood, etc" />
