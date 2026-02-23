@@ -66,6 +66,11 @@ const Encomendas = () => {
         type: 'encomenda',
         target_user: target
       });
+
+      // Abrir WhatsApp automaticamente (Opção 1)
+      setTimeout(() => {
+        sendWhatsApp(formData as Encomenda);
+      }, 500);
     }
     setIsOpen(false);
   };
