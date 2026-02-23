@@ -56,17 +56,17 @@ const Ocorrencias = () => {
     setIsOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.tipo || !formData.descricao) {
       toast({ title: "Erro", description: "Tipo e descrição são obrigatórios.", variant: "destructive" });
       return;
     }
 
     if (editingOcorrencia) {
-      updateOcorrencia(editingOcorrencia.id, formData);
+      await updateOcorrencia(editingOcorrencia.id, formData);
       toast({ title: "Sucesso", description: "Ocorrência atualizada!" });
     } else {
-      addOcorrencia(formData as Omit<Ocorrencia, 'id'>);
+      await addOcorrencia(formData as Omit<Ocorrencia, 'id'>);
       toast({ title: "Sucesso", description: "Ocorrência registrada!" });
 
       // Notify relevant parties
@@ -80,9 +80,9 @@ const Ocorrencias = () => {
     setIsOpen(false);
   };
 
-  const toggleStatus = (item: Ocorrencia) => {
+  const toggleStatus = async (item: Ocorrencia) => {
     const newStatus = item.status === 'active' ? 'pending' : 'active';
-    updateOcorrencia(item.id, { status: newStatus });
+    await updateOcorrencia(item.id, { status: newStatus });
     toast({ title: "Status alterado", description: newStatus === 'active' ? "Ocorrência marcada como resolvida." : "Ocorrência aberta." });
   };
 

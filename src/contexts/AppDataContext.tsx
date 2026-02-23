@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export interface Veiculo {
     id: string;
@@ -34,19 +35,21 @@ export interface Ocorrencia {
 
 interface AppDataContextType {
     veiculos: Veiculo[];
-    addVeiculo: (v: Omit<Veiculo, 'id'>) => void;
-    updateVeiculo: (id: string, v: Partial<Veiculo>) => void;
-    deleteVeiculo: (id: string) => void;
+    addVeiculo: (v: Omit<Veiculo, 'id'>) => Promise<void>;
+    updateVeiculo: (id: string, v: Partial<Veiculo>) => Promise<void>;
+    deleteVeiculo: (id: string) => Promise<void>;
 
     encomendas: Encomenda[];
-    addEncomenda: (e: Omit<Encomenda, 'id'>) => void;
-    updateEncomenda: (id: string, e: Partial<Encomenda>) => void;
-    deleteEncomenda: (id: string) => void;
+    addEncomenda: (e: Omit<Encomenda, 'id'>) => Promise<void>;
+    updateEncomenda: (id: string, e: Partial<Encomenda>) => Promise<void>;
+    deleteEncomenda: (id: string) => Promise<void>;
 
     ocorrencias: Ocorrencia[];
-    addOcorrencia: (o: Omit<Ocorrencia, 'id'>) => void;
-    updateOcorrencia: (id: string, o: Partial<Ocorrencia>) => void;
-    deleteOcorrencia: (id: string) => void;
+    addOcorrencia: (o: Omit<Ocorrencia, 'id'>) => Promise<void>;
+    updateOcorrencia: (id: string, o: Partial<Ocorrencia>) => Promise<void>;
+    deleteOcorrencia: (id: string) => Promise<void>;
+
+    isLoading: boolean;
 }
 
 export const AppDataContext = createContext<AppDataContextType | undefined>(undefined);
@@ -55,55 +58,115 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
     const [veiculos, setVeiculos] = useState<Veiculo[]>([]);
     const [encomendas, setEncomendas] = useState<Encomenda[]>([]);
     const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
+    // ──────────────────────────────────────────
+    // Initial Load from Supabase
+    // ──────────────────────────────────────────
     useEffect(() => {
-        const savedVeiculos = localStorage.getItem('otrebor_veiculos');
-        const savedEncomendas = localStorage.getItem('otrebor_encomendas');
-        const savedOcorrencias = localStorage.getItem('otrebor_ocorrencias');
-
-        if (savedVeiculos) setVeiculos(JSON.parse(savedVeiculos));
-        if (savedEncomendas) setEncomendas(JSON.parse(savedEncomendas));
-        if (savedOcorrencias) setOcorrencias(JSON.parse(savedOcorrencias));
-
-        setIsLoaded(true);
+        const loadAll = async () => {
+            setIsLoading(true);
+            try {
+                const [{ data: v }, { data: e }, { data: o }] = await Promise.all([
+                    supabase.from('veiculos').select('*').order('created_at', { ascending: false }),
+                    supabase.from('encomendas').select('*').order('created_at', { ascending: false }),
+                    supabase.from('ocorrencias').select('*').order('created_at', { ascending: false }),
+                ]);
+                if (v) setVeiculos(v as Veiculo[]);
+                if (e) setEncomendas(e as Encomenda[]);
+                if (o) setOcorrencias(o as Ocorrencia[]);
+            } catch (err) {
+                console.error('Erro ao carregar dados do Supabase:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadAll();
     }, []);
 
+    // ──────────────────────────────────────────
+    // Realtime subscriptions (sync between devices)
+    // ──────────────────────────────────────────
     useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem('otrebor_veiculos', JSON.stringify(veiculos));
-            localStorage.setItem('otrebor_encomendas', JSON.stringify(encomendas));
-            localStorage.setItem('otrebor_ocorrencias', JSON.stringify(ocorrencias));
-        }
-    }, [veiculos, encomendas, ocorrencias, isLoaded]);
+        const channel = supabase
+            .channel('app-data-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'encomendas' }, async () => {
+                const { data } = await supabase.from('encomendas').select('*').order('created_at', { ascending: false });
+                if (data) setEncomendas(data as Encomenda[]);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'ocorrencias' }, async () => {
+                const { data } = await supabase.from('ocorrencias').select('*').order('created_at', { ascending: false });
+                if (data) setOcorrencias(data as Ocorrencia[]);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'veiculos' }, async () => {
+                const { data } = await supabase.from('veiculos').select('*').order('created_at', { ascending: false });
+                if (data) setVeiculos(data as Veiculo[]);
+            })
+            .subscribe();
 
-    const addVeiculo = (v: Omit<Veiculo, 'id'>) => {
-        setVeiculos(prev => [...prev, { ...v, id: Math.random().toString(36).substr(2, 9) }]);
+        return () => { supabase.removeChannel(channel); };
+    }, []);
+
+    // ──────────────────────────────────────────
+    // Veículos CRUD
+    // ──────────────────────────────────────────
+    const addVeiculo = async (v: Omit<Veiculo, 'id'>) => {
+        const { data, error } = await supabase.from('veiculos').insert(v).select().single();
+        if (error) { console.error(error); return; }
+        if (data) setVeiculos(prev => [data as Veiculo, ...prev]);
     };
-    const updateVeiculo = (id: string, v: Partial<Veiculo>) => {
+
+    const updateVeiculo = async (id: string, v: Partial<Veiculo>) => {
+        const { error } = await supabase.from('veiculos').update(v).eq('id', id);
+        if (error) { console.error(error); return; }
         setVeiculos(prev => prev.map(item => item.id === id ? { ...item, ...v } : item));
     };
-    const deleteVeiculo = (id: string) => {
+
+    const deleteVeiculo = async (id: string) => {
+        const { error } = await supabase.from('veiculos').delete().eq('id', id);
+        if (error) { console.error(error); return; }
         setVeiculos(prev => prev.filter(item => item.id !== id));
     };
 
-    const addEncomenda = (e: Omit<Encomenda, 'id'>) => {
-        setEncomendas(prev => [...prev, { ...e, id: Math.random().toString(36).substr(2, 9) }]);
+    // ──────────────────────────────────────────
+    // Encomendas CRUD
+    // ──────────────────────────────────────────
+    const addEncomenda = async (e: Omit<Encomenda, 'id'>) => {
+        const { data, error } = await supabase.from('encomendas').insert(e).select().single();
+        if (error) { console.error(error); return; }
+        if (data) setEncomendas(prev => [data as Encomenda, ...prev]);
     };
-    const updateEncomenda = (id: string, e: Partial<Encomenda>) => {
+
+    const updateEncomenda = async (id: string, e: Partial<Encomenda>) => {
+        const { error } = await supabase.from('encomendas').update(e).eq('id', id);
+        if (error) { console.error(error); return; }
         setEncomendas(prev => prev.map(item => item.id === id ? { ...item, ...e } : item));
     };
-    const deleteEncomenda = (id: string) => {
+
+    const deleteEncomenda = async (id: string) => {
+        const { error } = await supabase.from('encomendas').delete().eq('id', id);
+        if (error) { console.error(error); return; }
         setEncomendas(prev => prev.filter(item => item.id !== id));
     };
 
-    const addOcorrencia = (o: Omit<Ocorrencia, 'id'>) => {
-        setOcorrencias(prev => [...prev, { ...o, id: Math.random().toString(36).substr(2, 9) }]);
+    // ──────────────────────────────────────────
+    // Ocorrências CRUD
+    // ──────────────────────────────────────────
+    const addOcorrencia = async (o: Omit<Ocorrencia, 'id'>) => {
+        const { data, error } = await supabase.from('ocorrencias').insert(o).select().single();
+        if (error) { console.error(error); return; }
+        if (data) setOcorrencias(prev => [data as Ocorrencia, ...prev]);
     };
-    const updateOcorrencia = (id: string, o: Partial<Ocorrencia>) => {
+
+    const updateOcorrencia = async (id: string, o: Partial<Ocorrencia>) => {
+        const { error } = await supabase.from('ocorrencias').update(o).eq('id', id);
+        if (error) { console.error(error); return; }
         setOcorrencias(prev => prev.map(item => item.id === id ? { ...item, ...o } : item));
     };
-    const deleteOcorrencia = (id: string) => {
+
+    const deleteOcorrencia = async (id: string) => {
+        const { error } = await supabase.from('ocorrencias').delete().eq('id', id);
+        if (error) { console.error(error); return; }
         setOcorrencias(prev => prev.filter(item => item.id !== id));
     };
 
@@ -111,7 +174,8 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
         <AppDataContext.Provider value={{
             veiculos, addVeiculo, updateVeiculo, deleteVeiculo,
             encomendas, addEncomenda, updateEncomenda, deleteEncomenda,
-            ocorrencias, addOcorrencia, updateOcorrencia, deleteOcorrencia
+            ocorrencias, addOcorrencia, updateOcorrencia, deleteOcorrencia,
+            isLoading,
         }}>
             {children}
         </AppDataContext.Provider>

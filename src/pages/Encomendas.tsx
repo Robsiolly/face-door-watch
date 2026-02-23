@@ -40,17 +40,17 @@ const Encomendas = () => {
     setIsOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.morador || !formData.descricao) {
       toast({ title: "Erro", description: "Morador e descrição são obrigatórios.", variant: "destructive" });
       return;
     }
 
     if (editingEncomenda) {
-      updateEncomenda(editingEncomenda.id, formData);
+      await updateEncomenda(editingEncomenda.id, formData);
       toast({ title: "Sucesso", description: "Encomenda atualizada!" });
     } else {
-      addEncomenda(formData as Omit<Encomenda, 'id'>);
+      await addEncomenda(formData as Omit<Encomenda, 'id'>);
       toast({ title: "Sucesso", description: "Encomenda registrada!" });
 
       // Notify resident
@@ -64,10 +64,10 @@ const Encomendas = () => {
     setIsOpen(false);
   };
 
-  const toggleStatus = (item: Encomenda) => {
+  const toggleStatus = async (item: Encomenda) => {
     if (isMorador) return;
     const newStatus = item.status === 'active' ? 'pending' : 'active';
-    updateEncomenda(item.id, { status: newStatus });
+    await updateEncomenda(item.id, { status: newStatus });
     toast({ title: "Status alterado", description: newStatus === 'active' ? "Encomenda marcada como retirada." : "Encomenda pendente." });
   };
 

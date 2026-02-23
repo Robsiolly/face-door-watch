@@ -29,17 +29,17 @@ const Veiculos = () => {
     setIsOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.placa || !formData.modelo) {
       toast({ title: "Erro", description: "Placa e modelo são obrigatórios.", variant: "destructive" });
       return;
     }
 
     if (editingVeiculo) {
-      updateVeiculo(editingVeiculo.id, formData);
+      await updateVeiculo(editingVeiculo.id, formData);
       toast({ title: "Sucesso", description: "Veículo atualizado!" });
     } else {
-      addVeiculo(formData as Omit<Veiculo, 'id'>);
+      await addVeiculo(formData as Omit<Veiculo, 'id'>);
       toast({ title: "Sucesso", description: "Veículo adicionado!" });
     }
     setIsOpen(false);

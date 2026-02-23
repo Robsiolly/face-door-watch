@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export type PersonType = 'morador' | 'visitante' | 'prestador';
 
@@ -19,62 +20,91 @@ export interface Person {
     data?: string;
     faceFeature?: boolean;
     faceDescriptor?: number[];
-    photo?: string; // Base64 representation of the face photo
+    photo?: string;
     status: 'active' | 'inactive' | 'authorized' | 'denied' | 'pending';
 }
 
 interface PeopleContextType {
     people: Person[];
-    addPerson: (person: Omit<Person, 'id'>) => void;
+    addPerson: (person: Omit<Person, 'id'>) => Promise<void>;
     findPersonByDoc: (doc: string) => Person | undefined;
     getPeopleByType: (type: PersonType) => Person[];
-    deletePerson: (id: string) => void;
-    updatePerson: (id: string, updatedFields: Partial<Person>) => void;
+    deletePerson: (id: string) => Promise<void>;
+    updatePerson: (id: string, updatedFields: Partial<Person>) => Promise<void>;
     clearAll: () => void;
+    isLoading: boolean;
 }
 
 export const PeopleContext = createContext<PeopleContextType | undefined>(undefined);
 
 export const PeopleProvider = ({ children }: { children: React.ReactNode }) => {
     const [people, setPeople] = useState<Person[]>([]);
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
+    // ──────────────────────────────────────────
+    // Initial Load from Supabase
+    // ──────────────────────────────────────────
     useEffect(() => {
-        const saved = localStorage.getItem('otrebor_people');
-        if (saved) {
+        const loadPeople = async () => {
+            setIsLoading(true);
             try {
-                setPeople(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse", e);
+                const { data, error } = await supabase
+                    .from('pessoas')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                if (data) setPeople(data as Person[]);
+            } catch (err) {
+                console.error('Erro ao carregar pessoas do Supabase:', err);
+            } finally {
+                setIsLoading(false);
             }
-        }
-        setIsLoaded(true);
+        };
+        loadPeople();
     }, []);
 
+    // ──────────────────────────────────────────
+    // Realtime subscription
+    // ──────────────────────────────────────────
     useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem('otrebor_people', JSON.stringify(people));
-        }
-    }, [people, isLoaded]);
+        const channel = supabase
+            .channel('pessoas-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'pessoas' }, async () => {
+                const { data } = await supabase.from('pessoas').select('*').order('created_at', { ascending: false });
+                if (data) setPeople(data as Person[]);
+            })
+            .subscribe();
 
-    const addPerson = (person: Omit<Person, 'id'>) => {
-        setPeople(prev => [...prev, { ...person, id: Math.random().toString(36).substr(2, 9) }]);
+        return () => { supabase.removeChannel(channel); };
+    }, []);
+
+    // ──────────────────────────────────────────
+    // CRUD
+    // ──────────────────────────────────────────
+    const addPerson = async (person: Omit<Person, 'id'>) => {
+        const { data, error } = await supabase.from('pessoas').insert(person).select().single();
+        if (error) { console.error('addPerson error:', error); return; }
+        if (data) setPeople(prev => [data as Person, ...prev]);
+    };
+
+    const updatePerson = async (id: string, updatedFields: Partial<Person>) => {
+        const { error } = await supabase.from('pessoas').update(updatedFields).eq('id', id);
+        if (error) { console.error('updatePerson error:', error); return; }
+        setPeople(prev => prev.map(p => p.id === id ? { ...p, ...updatedFields } : p));
+    };
+
+    const deletePerson = async (id: string) => {
+        const { error } = await supabase.from('pessoas').delete().eq('id', id);
+        if (error) { console.error('deletePerson error:', error); return; }
+        setPeople(prev => prev.filter(p => p.id !== id));
     };
 
     const findPersonByDoc = (doc: string) => people.find(p => p.documento === doc);
     const getPeopleByType = (type: PersonType) => people.filter(p => p.type === type);
 
-    const deletePerson = (id: string) => {
-        setPeople(prev => prev.filter(p => p.id !== id));
-    };
-
-    const updatePerson = (id: string, updatedFields: Partial<Person>) => {
-        setPeople(prev => prev.map(p => p.id === id ? { ...p, ...updatedFields } : p));
-    };
-
     const clearAll = () => {
+        // Just clear local state; no need to delete from DB in this flow
         setPeople([]);
-        localStorage.removeItem('otrebor_people');
     };
 
     return (
@@ -85,7 +115,8 @@ export const PeopleProvider = ({ children }: { children: React.ReactNode }) => {
             getPeopleByType,
             deletePerson,
             updatePerson,
-            clearAll
+            clearAll,
+            isLoading,
         }}>
             {children}
         </PeopleContext.Provider>
