@@ -57,14 +57,14 @@ export function NotificationCenter() {
                     variant: newNotif.type === 'ocorrencia' ? 'destructive' : 'default',
                 });
 
-                if (Notification.permission === "granted") {
+                if (typeof Notification !== 'undefined' && Notification.permission === "granted") {
                     new Notification(newNotif.title, { body: newNotif.message });
                 }
             }
         });
 
         // Pedir permissão
-        if (Notification.permission === "default") {
+        if (typeof Notification !== 'undefined' && Notification.permission === "default") {
             Notification.requestPermission();
         }
 
