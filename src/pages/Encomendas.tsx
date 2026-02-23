@@ -62,7 +62,7 @@ const Encomendas = () => {
 
       notificationService.send({
         title: "Correspondência na Portaria",
-        message: `Olá, há uma correspondência na portaria para você referente a: ${formData.descricao}.`,
+        message: `Olá, há uma correspondência na portaria para você. Favor retirar assim que possível.`,
         type: 'encomenda',
         target_user: target
       });
@@ -100,7 +100,7 @@ const Encomendas = () => {
     }
 
     const phone = morador.telefone.replace(/\D/g, '');
-    const message = `Olá ${item.morador}, há uma correspondência na portaria para você referente a: ${item.descricao}. Favor retirar assim que possível.`;
+    const message = `Olá ${item.morador}, há uma correspondência na portaria para você. Favor retirar assim que possível.`;
     const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
 
     window.location.href = url;
