@@ -4,8 +4,9 @@ import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, PackageCheck } from "lucide-react";
+import { Plus, Edit, Trash2, PackageCheck, MessageCircle } from "lucide-react";
 import { useAppData, Encomenda } from "@/contexts/AppDataContext";
+import { usePeople } from "@/contexts/PeopleContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Encomendas = () => {
   const { encomendas, addEncomenda, updateEncomenda, deleteEncomenda } = useAppData();
+  const { findPersonByDoc, people } = usePeople();
   const { user } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -75,6 +77,30 @@ const Encomendas = () => {
     toast({ title: "Status alterado", description: newStatus === 'active' ? "Encomenda marcada como retirada." : "Encomenda pendente." });
   };
 
+  const sendWhatsApp = (item: Encomenda) => {
+    // Tenta encontrar o morador pelo nome ou bloco/apto para pegar o telefone
+    const morador = people.find(p =>
+      p.type === 'morador' &&
+      p.bloco === item.bloco &&
+      p.apartamento === item.apto
+    );
+
+    if (!morador?.telefone) {
+      toast({
+        title: "Telefone não encontrado",
+        description: "O morador não possui telefone cadastrado para envio automático.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const phone = morador.telefone.replace(/\D/g, '');
+    const message = `Olá ${item.morador}, uma nova encomenda (${item.descricao}) foi recebida para você na portaria do Otrebor Watch. Favor retirar assim que possível.`;
+    const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, '_blank');
+  };
+
   const columns = [
     {
       key: "morador_info",
@@ -122,6 +148,15 @@ const Encomendas = () => {
               title={item.status === 'active' ? "Marcar como não retirado" : "Marcar como retirado"}
             >
               <PackageCheck className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-green-500 hover:text-green-600 hover:bg-green-50"
+              onClick={() => sendWhatsApp(item)}
+              title="Notificar via WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4" />
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground" onClick={() => handleOpen(item)}>
               <Edit className="w-4 h-4" />
