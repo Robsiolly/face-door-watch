@@ -9,7 +9,14 @@ export interface Notification {
 }
 
 // Canal de comunicação em tempo real entre as abas do navegador
-const channel = new BroadcastChannel('otrebor_notifications');
+// Fallback para navegadores que não suportam BroadcastChannel
+const channel = typeof BroadcastChannel !== 'undefined'
+    ? new BroadcastChannel('otrebor_notifications')
+    : {
+        postMessage: () => { },
+        addEventListener: () => { },
+        removeEventListener: () => { },
+    } as any;
 
 export const notificationService = {
     // Salva e envia a notificação
