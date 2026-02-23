@@ -56,9 +56,9 @@ const Moradores = () => {
 
     const phone = person.telefone.replace(/\D/g, '');
     const message = `Olá ${person.nome}! Este é o seu link de acesso exclusivo para o app Otrebor Watch: ${magicLink}\n\nCom ele você poderá receber notificações de encomendas e visitantes em tempo real.`;
-    const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
+    const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
 
-    window.open(url, '_blank');
+    window.location.href = url;
   };
 
   const columns = [

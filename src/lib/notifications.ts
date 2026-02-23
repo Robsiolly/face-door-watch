@@ -30,14 +30,35 @@ realtimeChannel.subscribe((status) => {
 export const notificationService = {
     // Salva e envia a notificação
     async send(notifData: Omit<Notification, 'id' | 'created_at' | 'read'>) {
-        const newNotif: Notification = {
+        // 1. Salva no Supabase (Histórico Permanente)
+        const { data, error } = await supabase
+            .from('notificacoes')
+            .insert([{
+                title: notifData.title,
+                message: notifData.message,
+                type: notifData.type,
+                target_user: notifData.target_user,
+                read: false
+            }])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Erro ao salvar no histórico:', error);
+        }
+
+        const newNotif: Notification = data ? {
+            ...data,
+            id: data.id,
+            created_at: data.created_at
+        } : {
             ...notifData,
             id: Math.random().toString(36).substr(2, 9),
             created_at: new Date().toISOString(),
             read: false
         };
 
-        // Salva no LocalStorage (nosso banco de dados local da origem)
+        // Salva no LocalStorage também para resposta instantânea
         const saved = localStorage.getItem('otrebor_notifications');
         const notifications = saved ? JSON.parse(saved) : [];
         notifications.unshift(newNotif);
@@ -50,7 +71,7 @@ export const notificationService = {
             payload: newNotif
         });
 
-        // Dispara um evento local para a própria aba também saber
+        // Dispara um evento local
         window.dispatchEvent(new CustomEvent('new_notification', { detail: newNotif }));
 
         return newNotif;

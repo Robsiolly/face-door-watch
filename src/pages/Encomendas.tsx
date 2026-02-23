@@ -101,9 +101,9 @@ const Encomendas = () => {
 
     const phone = morador.telefone.replace(/\D/g, '');
     const message = `Olá ${item.morador}, uma nova encomenda (${item.descricao}) foi recebida para você na portaria do Otrebor Watch. Favor retirar assim que possível.`;
-    const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
+    const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
 
-    window.open(url, '_blank');
+    window.location.href = url;
   };
 
   const columns = [
