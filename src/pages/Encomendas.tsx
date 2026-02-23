@@ -116,7 +116,20 @@ const Encomendas = () => {
     window.location.href = url;
   };
 
-  const columns = [
+  const columns = isMorador ? [
+    { key: "descricao", label: "Correspondência" },
+    { key: "dataRecebimento", label: "Data" },
+    {
+      key: "status",
+      label: "Situação",
+      render: (item: Encomenda) => (
+        <StatusBadge
+          status={item.status}
+          label={item.status === "active" ? "Retirado" : "Disponível na Portaria"}
+        />
+      ),
+    },
+  ] : [
     {
       key: "morador_info",
       label: "Destinatário",
