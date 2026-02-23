@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/components/ui/use-toast';
 
 export interface Veiculo {
     id: string;
@@ -59,6 +60,7 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
     const [encomendas, setEncomendas] = useState<Encomenda[]>([]);
     const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
 
     // ──────────────────────────────────────────
     // Initial Load from Supabase
@@ -112,13 +114,21 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
     // ──────────────────────────────────────────
     const addVeiculo = async (v: Omit<Veiculo, 'id'>) => {
         const { data, error } = await supabase.from('veiculos').insert(v).select().single();
-        if (error) { console.error(error); return; }
+        if (error) {
+            console.error(error);
+            toast({ title: "Erro ao salvar veículo", description: error.message, variant: "destructive" });
+            return;
+        }
         if (data) setVeiculos(prev => [data as Veiculo, ...prev]);
     };
 
     const updateVeiculo = async (id: string, v: Partial<Veiculo>) => {
         const { error } = await supabase.from('veiculos').update(v).eq('id', id);
-        if (error) { console.error(error); return; }
+        if (error) {
+            console.error(error);
+            toast({ title: "Erro ao atualizar veículo", description: error.message, variant: "destructive" });
+            return;
+        }
         setVeiculos(prev => prev.map(item => item.id === id ? { ...item, ...v } : item));
     };
 
@@ -133,13 +143,21 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
     // ──────────────────────────────────────────
     const addEncomenda = async (e: Omit<Encomenda, 'id'>) => {
         const { data, error } = await supabase.from('encomendas').insert(e).select().single();
-        if (error) { console.error(error); return; }
+        if (error) {
+            console.error(error);
+            toast({ title: "Erro ao salvar encomenda", description: error.message, variant: "destructive" });
+            return;
+        }
         if (data) setEncomendas(prev => [data as Encomenda, ...prev]);
     };
 
     const updateEncomenda = async (id: string, e: Partial<Encomenda>) => {
         const { error } = await supabase.from('encomendas').update(e).eq('id', id);
-        if (error) { console.error(error); return; }
+        if (error) {
+            console.error(error);
+            toast({ title: "Erro ao atualizar encomenda", description: error.message, variant: "destructive" });
+            return;
+        }
         setEncomendas(prev => prev.map(item => item.id === id ? { ...item, ...e } : item));
     };
 
@@ -154,13 +172,21 @@ export const AppDataProvider = ({ children }: { children: React.ReactNode }) => 
     // ──────────────────────────────────────────
     const addOcorrencia = async (o: Omit<Ocorrencia, 'id'>) => {
         const { data, error } = await supabase.from('ocorrencias').insert(o).select().single();
-        if (error) { console.error(error); return; }
+        if (error) {
+            console.error(error);
+            toast({ title: "Erro ao salvar ocorrência", description: error.message, variant: "destructive" });
+            return;
+        }
         if (data) setOcorrencias(prev => [data as Ocorrencia, ...prev]);
     };
 
     const updateOcorrencia = async (id: string, o: Partial<Ocorrencia>) => {
         const { error } = await supabase.from('ocorrencias').update(o).eq('id', id);
-        if (error) { console.error(error); return; }
+        if (error) {
+            console.error(error);
+            toast({ title: "Erro ao atualizar ocorrência", description: error.message, variant: "destructive" });
+            return;
+        }
         setOcorrencias(prev => prev.map(item => item.id === id ? { ...item, ...o } : item));
     };
 

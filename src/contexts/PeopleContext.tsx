@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/components/ui/use-toast';
 
 export type PersonType = 'morador' | 'visitante' | 'prestador';
 
@@ -40,6 +41,7 @@ export const PeopleContext = createContext<PeopleContextType | undefined>(undefi
 export const PeopleProvider = ({ children }: { children: React.ReactNode }) => {
     const [people, setPeople] = useState<Person[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
 
     // ──────────────────────────────────────────
     // Initial Load from Supabase
@@ -83,7 +85,11 @@ export const PeopleProvider = ({ children }: { children: React.ReactNode }) => {
     // ──────────────────────────────────────────
     const addPerson = async (person: Omit<Person, 'id'>) => {
         const { data, error } = await supabase.from('pessoas').insert(person).select().single();
-        if (error) { console.error('addPerson error:', error); return; }
+        if (error) {
+            console.error('addPerson error:', error);
+            toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+            return;
+        }
         if (data) setPeople(prev => [data as Person, ...prev]);
     };
 
