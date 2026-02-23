@@ -166,7 +166,7 @@ const Portaria = () => {
         </div>
       </PageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 space-y-4">
           <div className="relative aspect-video rounded-3xl overflow-hidden bg-muted border border-border shadow-2xl">
             {isCameraLoading ? (
@@ -253,9 +253,10 @@ const Portaria = () => {
 
             {/* Bottom Bar Controls */}
             {!isScanning && !foundPerson && !unrecognized && stream && (
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4">
-                <Button onClick={handleScan} className="bg-primary hover:bg-primary/90 text-primary-foreground h-14 px-8 rounded-full shadow-2xl shadow-primary/40 gap-3 font-bold text-lg group">
-                  <ScanFace className="w-6 h-6 group-hover:scale-110 transition-transform" /> Iniciar Reconhecimento
+              <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4">
+                <Button onClick={handleScan} className="bg-primary hover:bg-primary/90 text-primary-foreground h-11 sm:h-14 px-5 sm:px-8 rounded-full shadow-2xl shadow-primary/40 gap-2 sm:gap-3 font-bold text-sm sm:text-lg group">
+                  <ScanFace className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+                  <span className="hidden xs:inline">Iniciar </span>Reconhecimento
                 </Button>
               </div>
             )}
@@ -295,26 +296,26 @@ const Portaria = () => {
           </div>
 
           {/* Quick Info Bar */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="glass-card p-4 flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-primary/10 text-primary"><Users className="w-5 h-5" /></div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="glass-card p-3 sm:p-4 flex items-center gap-3">
+              <div className="p-2 sm:p-3 rounded-2xl bg-primary/10 text-primary shrink-0"><Users className="w-4 h-4 sm:w-5 sm:h-5" /></div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Total Base</p>
-                <p className="text-xl font-bold">{people.length}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Total Base</p>
+                <p className="text-lg sm:text-xl font-bold">{people.length}</p>
               </div>
             </div>
-            <div className="glass-card p-4 flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-accent/10 text-accent"><Clock className="w-5 h-5" /></div>
+            <div className="glass-card p-3 sm:p-4 flex items-center gap-3">
+              <div className="p-2 sm:p-3 rounded-2xl bg-accent/10 text-accent shrink-0"><Clock className="w-4 h-4 sm:w-5 sm:h-5" /></div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Último Acesso</p>
-                <p className="text-xl font-bold">12:45</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Último Acesso</p>
+                <p className="text-lg sm:text-xl font-bold">12:45</p>
               </div>
             </div>
-            <div className="glass-card p-4 flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-warning/10 text-warning"><UserPlus className="w-5 h-5" /></div>
+            <div className="col-span-2 sm:col-span-1 glass-card p-3 sm:p-4 flex items-center gap-3">
+              <div className="p-2 sm:p-3 rounded-2xl bg-warning/10 text-warning shrink-0"><UserPlus className="w-4 h-4 sm:w-5 sm:h-5" /></div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Pendentes</p>
-                <p className="text-xl font-bold">03</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Pendentes</p>
+                <p className="text-lg sm:text-xl font-bold">03</p>
               </div>
             </div>
           </div>

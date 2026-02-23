@@ -81,15 +81,32 @@
     width: 6px;
     height: 6px;
   }
+
   ::-webkit-scrollbar-track {
     background: hsl(var(--background));
   }
+
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
     border-radius: 3px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground));
+  }
+
+  /* Prevent horizontal overflow on mobile */
+  html,
+  body {
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Improve touch interactions */
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
   }
 }
 
@@ -127,7 +144,7 @@
   }
 
   .metric-card {
-    @apply glass-card p-5 transition-all duration-300;
+    @apply glass-card p-3 sm:p-5 transition-all duration-300;
   }
 
   .metric-card:hover {
@@ -140,8 +157,15 @@
   }
 
   @keyframes pulseGreen {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(142 71% 45% / 0.4); }
-    50% { box-shadow: 0 0 0 8px hsl(142 71% 45% / 0); }
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 hsl(142 71% 45% / 0.4);
+    }
+
+    50% {
+      box-shadow: 0 0 0 8px hsl(142 71% 45% / 0);
+    }
   }
 
   .fade-in {
@@ -149,8 +173,15 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .camera-feed {
@@ -164,7 +195,16 @@
   }
 
   @keyframes faceDetect {
-    0%, 100% { border-color: hsl(142 71% 45%); box-shadow: 0 0 10px hsl(142 71% 45% / 0.3); }
-    50% { border-color: hsl(142 71% 55%); box-shadow: 0 0 20px hsl(142 71% 45% / 0.5); }
+
+    0%,
+    100% {
+      border-color: hsl(142 71% 45%);
+      box-shadow: 0 0 10px hsl(142 71% 45% / 0.3);
+    }
+
+    50% {
+      border-color: hsl(142 71% 55%);
+      box-shadow: 0 0 20px hsl(142 71% 45% / 0.5);
+    }
   }
 }

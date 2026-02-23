@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "./ui/button";
 
 const navItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ['portaria', 'admin', 'morador'] },
@@ -42,18 +41,23 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
   const { user, logout } = useAuth();
 
   const filteredItems = navItems.filter(item => user && item.roles.includes(user.role));
+  // In drawer mode, never collapse
+  const isCollapsed = isDrawer ? false : collapsed;
 
   return (
     <aside
-      className={`${collapsed ? "w-[72px]" : "w-64"
-        } h-screen sticky top-0 flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 z-50`}
+      className={`
+        ${isCollapsed ? "w-[72px]" : "w-64"}
+        ${isDrawer ? "h-full" : "h-screen sticky top-0"}
+        flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 z-50
+      `}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border">
+      <div className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border shrink-0">
         <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
           <Shield className="w-5 h-5 text-primary-foreground" />
         </div>
-        {!collapsed && (
+        {!isCollapsed && (
           <div className="overflow-hidden">
             <h1 className="text-sm font-bold text-foreground tracking-tight">OTREBOR</h1>
             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-none mt-1">Watch</p>
@@ -68,18 +72,19 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
             key={item.url}
             to={item.url}
             end={item.url === "/"}
+            onClick={onNavItemClick}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors text-sm"
             activeClassName="bg-primary/10 text-primary font-medium"
           >
             <item.icon className="w-5 h-5 shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
+            {!isCollapsed && <span>{item.title}</span>}
           </NavLink>
         ))}
       </nav>
 
       {/* User Info & Actions */}
-      <div className="p-2 space-y-2 border-t border-sidebar-border">
-        {!collapsed && user && (
+      <div className="p-2 space-y-2 border-t border-sidebar-border shrink-0">
+        {!isCollapsed && user && (
           <div className="px-3 py-2 rounded-xl bg-secondary/30 mb-2">
             <p className="text-xs font-bold text-foreground line-clamp-1">{user.name}</p>
             <p className="text-[10px] text-muted-foreground uppercase font-bold">
@@ -89,19 +94,22 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
         )}
 
         <button
-          onClick={logout}
+          onClick={() => { logout(); onNavItemClick?.(); }}
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-colors text-sm font-medium"
         >
           <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Sair do Sistema</span>}
+          {!isCollapsed && <span>Sair do Sistema</span>}
         </button>
 
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-center h-10 w-full rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-        >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+        {/* Collapse toggle only on desktop, not in drawer mode */}
+        {!isDrawer && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="flex items-center justify-center h-10 w-full rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+          >
+            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+        )}
       </div>
     </aside>
   );

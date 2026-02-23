@@ -27,13 +27,13 @@ const iconBgStyles = {
 export function MetricCard({ title, value, icon, trend, variant = "default" }: MetricCardProps) {
   return (
     <div className={`metric-card ${variantStyles[variant]}`}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">{title}</p>
-          <p className="text-3xl font-bold text-foreground">{value}</p>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1 truncate">{title}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-foreground">{value}</p>
           {trend && <p className="text-xs text-primary mt-1">{trend}</p>}
         </div>
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${iconBgStyles[variant]}`}>
+        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBgStyles[variant]}`}>
           {icon}
         </div>
       </div>

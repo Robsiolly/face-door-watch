@@ -74,7 +74,7 @@ const Dashboard = () => {
       />
 
       {/* Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-in">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 fade-in">
         {!isMorador && <MetricCard title="Acessos Hoje" value={0} icon={<DoorOpen className="w-5 h-5" />} trend="+0% vs ontem" variant="success" />}
         {!isMorador && <MetricCard title="Visitantes Presentes" value={totalVisitantes} icon={<Users className="w-5 h-5" />} variant="accent" />}
         <MetricCard title="Suas Encomendas" value={myEncomendas.length} icon={<Package className="w-5 h-5" />} variant="default" />
@@ -82,12 +82,12 @@ const Dashboard = () => {
       </div>
 
       {isMorador ? (
-        <div className="glass-card p-8 text-center space-y-6 mt-8">
-          <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
-            <ShieldCheck className="w-10 h-10 text-primary" />
+        <div className="glass-card p-6 sm:p-8 text-center space-y-4 sm:space-y-6 mt-4 sm:mt-8">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+            <ShieldCheck className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold italic tracking-tight">Seu ambiente está seguro</h2>
-          <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
+          <h2 className="text-xl sm:text-2xl font-bold italic tracking-tight">Seu ambiente está seguro</h2>
+          <p className="text-muted-foreground max-w-md mx-auto leading-relaxed text-sm sm:text-base">
             Utilize o menu lateral para conferir suas encomendas pendentes ou registrar uma nova ocorrência com a administração. Todas as suas informações são privadas.
           </p>
         </div>
@@ -149,7 +149,7 @@ const Dashboard = () => {
           </div>
 
           {/* Lists */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="glass-card p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Clock className="w-4 h-4 text-primary" />
