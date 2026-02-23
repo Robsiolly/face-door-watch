@@ -100,7 +100,7 @@ const Encomendas = () => {
     }
 
     const phone = morador.telefone.replace(/\D/g, '');
-    const message = `Olá ${item.morador}, uma nova encomenda (${item.descricao}) foi recebida para você na portaria do Otrebor Watch. Favor retirar assim que possível.`;
+    const message = `Olá ${item.morador}, há uma correspondência na portaria para você referente a: ${item.descricao}. Favor retirar assim que possível.`;
     const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
 
     window.location.href = url;
