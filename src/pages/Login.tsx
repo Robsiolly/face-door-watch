@@ -158,7 +158,7 @@ const Login = () => {
                     <div className="flex flex-col items-center">
                         <img src="/favicon.svg" alt="Logo" className="w-24 h-24 mb-6 hover:scale-110 transition-transform duration-700" />
                         <h1 className="text-6xl font-bold gold-text uppercase mb-2">Otrebor</h1>
-                        <p className="text-muted-foreground font-semibold tracking-widest text-xs uppercase opacity-60">Intelligence & Defense</p>
+                        <p className="text-muted-foreground font-semibold tracking-widest text-xs uppercase opacity-60">Inteligência & Segurança</p>
                     </div>
                 </div>
 
@@ -170,7 +170,7 @@ const Login = () => {
                                 onClick={() => setMode('login')}
                                 className={`flex-1 py-5 text-sm font-bold uppercase tracking-wider transition-all ${mode === 'login' ? 'text-primary' : 'text-muted-foreground hover:text-white'}`}
                             >
-                                Login
+                                Entrar
                             </button>
                             <button
                                 onClick={() => setMode('register')}

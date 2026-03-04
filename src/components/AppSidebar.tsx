@@ -19,7 +19,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ['portaria', 'admin'] },
+  { title: "Painel", url: "/", icon: LayoutDashboard, roles: ['portaria', 'admin'] },
   { title: "Portaria", url: "/portaria", icon: ScanFace, roles: ['portaria', 'admin'] },
   { title: "Moradores", url: "/moradores", icon: Users, roles: ['portaria', 'admin'] },
   { title: "Visitantes", url: "/visitantes", icon: UserCheck, roles: ['portaria', 'admin'] },
@@ -61,7 +61,7 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
             <h1 className="text-lg font-bold text-foreground gold-text uppercase">OTREBOR</h1>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider opacity-60">Intelligence</p>
+              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider opacity-60">Inteligência</p>
             </div>
           </div>
         )}

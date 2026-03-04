@@ -50,7 +50,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {/* Desktop: Navigation indicator */}
           <div className="hidden md:flex flex-1 items-center gap-4">
             <div className="px-5 py-2 rounded-full bg-white/[0.03] border border-white/5 text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 animate-pulse">
-              Quantum Interface Active • v2.0
+              Interface Quântica Ativa • v2.0
             </div>
           </div>
 

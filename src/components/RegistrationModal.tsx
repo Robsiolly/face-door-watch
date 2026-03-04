@@ -231,7 +231,7 @@ export function RegistrationModal({ isOpen, onClose, type, personToEdit }: Regis
         <Dialog open={isOpen} onOpenChange={(val) => !val && handleClose()}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Cadastrar {type}</DialogTitle>
+                    <DialogTitle>{personToEdit ? 'Editar ' : 'Cadastrar '}{type === 'morador' ? 'Morador' : type === 'visitante' ? 'Visitante' : 'Prestador'}</DialogTitle>
                 </DialogHeader>
 
                 {step === 1 ? (
@@ -266,7 +266,7 @@ export function RegistrationModal({ isOpen, onClose, type, personToEdit }: Regis
                                     {faceCaptured && (
                                         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 animate-in fade-in duration-500">
                                             {capturedPhoto ? (
-                                                <img src={capturedPhoto} alt="Captured face" className="absolute inset-0 w-full h-full object-cover" />
+                                                <img src={capturedPhoto} alt="Face capturada" className="absolute inset-0 w-full h-full object-cover" />
                                             ) : (
                                                 <div className="absolute inset-0 bg-background/90" />
                                             )}
