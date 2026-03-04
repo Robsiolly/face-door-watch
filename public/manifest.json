@@ -1,7 +1,8 @@
 {
     "name": "OTREBOR",
     "short_name": "OTREBOR",
-    "description": "Security & Ecosystem",
+    "description": "Sistema de Portaria com Reconhecimento Facial",
+    "lang": "pt-BR",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#000000",

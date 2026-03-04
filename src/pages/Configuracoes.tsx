@@ -89,7 +89,7 @@ const Configuracoes = () => (
                   <p className="text-sm font-medium text-foreground">{cam.nome}</p>
                   <p className="text-xs text-muted-foreground">{cam.localizacao} • {cam.tipo}</p>
                 </div>
-                <StatusBadge status={cam.status} label={cam.status === "active" ? "Online" : "Offline"} />
+                <StatusBadge status={cam.status} label={cam.status === "active" ? "Online" : "Desligado"} />
               </div>
             ))}
           </div>
