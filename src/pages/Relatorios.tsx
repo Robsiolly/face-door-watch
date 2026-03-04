@@ -35,10 +35,10 @@ const accessData = [
 
 const tooltipStyle = {
   contentStyle: {
-    background: "hsl(220, 20%, 13%)",
-    border: "1px solid hsl(220, 15%, 25%)",
+    background: "hsl(222, 47%, 10%)",
+    border: "1px solid hsl(222, 47%, 20%)",
     borderRadius: "12px",
-    color: "hsl(210, 20%, 95%)",
+    color: "hsl(213, 31%, 91%)",
   },
 };
 
@@ -91,13 +91,13 @@ const Relatorios = () => (
         <h3 className="text-sm font-semibold text-foreground mb-4">Acessos por Período</h3>
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={accessData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 20%)" />
-            <XAxis dataKey="dia" stroke="hsl(215, 15%, 55%)" fontSize={11} />
-            <YAxis stroke="hsl(215, 15%, 55%)" fontSize={11} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 15%)" />
+            <XAxis dataKey="dia" stroke="hsl(215, 20%, 65%)" fontSize={11} />
+            <YAxis stroke="hsl(215, 20%, 65%)" fontSize={11} />
             <Tooltip {...tooltipStyle} />
-            <Bar dataKey="moradores" fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="visitantes" fill="hsl(210, 60%, 50%)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="prestadores" fill="hsl(45, 93%, 47%)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="moradores" fill="hsl(45, 75%, 55%)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="visitantes" fill="hsl(215, 30%, 60%)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="prestadores" fill="hsl(45, 50%, 40%)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -106,11 +106,11 @@ const Relatorios = () => (
         <h3 className="text-sm font-semibold text-foreground mb-4">Tendência de Visitantes</h3>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={accessData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 20%)" />
-            <XAxis dataKey="dia" stroke="hsl(215, 15%, 55%)" fontSize={11} />
-            <YAxis stroke="hsl(215, 15%, 55%)" fontSize={11} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 15%)" />
+            <XAxis dataKey="dia" stroke="hsl(215, 20%, 65%)" fontSize={11} />
+            <YAxis stroke="hsl(215, 20%, 65%)" fontSize={11} />
             <Tooltip {...tooltipStyle} />
-            <Line type="monotone" dataKey="visitantes" stroke="hsl(210, 60%, 50%)" strokeWidth={2} dot={{ fill: "hsl(210, 60%, 50%)" }} />
+            <Line type="monotone" dataKey="visitantes" stroke="hsl(45, 75%, 55%)" strokeWidth={2} dot={{ fill: "hsl(45, 75%, 55%)" }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

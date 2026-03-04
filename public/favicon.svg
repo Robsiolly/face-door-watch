@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Complex Premium Gold Gradient -->
+    <linearGradient id="gold-premium" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#bf953f;stop-opacity:1" />
+      <stop offset="20%" style="stop-color:#fcf6ba;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#b38728;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#fbf5b7;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#aa771c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#bf953f;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Outer Glow for visibility and premium look -->
+    <filter id="glow-effect" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="text-depth" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card (same dark grey as the image) -->
+  <rect width="512" height="512" rx="120" fill="#1e1f22"/>
+
+  <g filter="url(#glow-effect)">
+    <!-- Main Outer Shield -->
+    <path d="M256 425s120-60 120-150V130l-120-45-120 45v130c0 90 120 150 120 150z" fill="none" stroke="url(#gold-premium)" stroke-width="12" stroke-linejoin="round"/>
+    
+    <!-- Inner Shield (Double Line Effect) -->
+    <path d="M256 400s98-49 98-122V150l-98-38-98 38v112c0 73 98 122 98 122z" fill="none" stroke="url(#gold-premium)" stroke-width="4" stroke-linejoin="round"/>
+    
+    <!-- OTREBOR Official Text (Serif Premium) -->
+    <text x="256" y="260" font-family="Times New Roman, Georgia, serif" font-weight="900" font-size="78" fill="url(#gold-premium)" text-anchor="middle" letter-spacing="2" filter="url(#text-depth)">OTREBOR</text>
+    
+    <!-- Elegant Curve Arc below text -->
+    <path d="M185 290 Q256 365 327 290" fill="none" stroke="url(#gold-premium)" stroke-width="7" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -6,7 +6,7 @@ interface DataTableProps<T> {
   data: T[];
   columns: { key: string; label: string; render?: (item: T) => ReactNode }[];
   searchPlaceholder?: string;
-  searchKey?: string;
+  searchKey?: string | string[];
   actions?: (item: T) => ReactNode;
 }
 
@@ -20,9 +20,24 @@ export function DataTable<T extends Record<string, any>>({
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
 
-  const filtered = data.filter((item) =>
-    String(item[searchKey] || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = data.filter((item) => {
+    const searchLower = search.toLowerCase().trim();
+    if (!searchLower) return true;
+
+    const keysToSearch = Array.isArray(searchKey)
+      ? searchKey
+      : (searchKey ? [searchKey] : []);
+
+    if (keysToSearch.length === 0) {
+      return Object.values(item).some(val =>
+        String(val || "").toLowerCase().includes(searchLower)
+      );
+    }
+
+    return keysToSearch.some(key =>
+      String(item[key] || "").toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <div className="glass-card overflow-hidden">

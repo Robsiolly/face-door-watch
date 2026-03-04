@@ -90,7 +90,8 @@ const Prestadores = () => {
       <DataTable
         data={data}
         columns={columns}
-        searchPlaceholder="Buscar prestador..."
+        searchPlaceholder="Buscar nome, documento, empresa ou serviço..."
+        searchKey={["nome", "documento", "empresa", "servico"]}
         actions={(item: Person) => (
           <div className="flex items-center gap-1 justify-end">
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground" onClick={() => handleViewDetails(item)}>

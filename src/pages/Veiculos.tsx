@@ -17,6 +17,14 @@ const Veiculos = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingVeiculo, setEditingVeiculo] = useState<Veiculo | null>(null);
   const [formData, setFormData] = useState<Partial<Veiculo>>({});
+  const [filterBloco, setFilterBloco] = useState("");
+  const [filterApto, setFilterApto] = useState("");
+
+  const displayData = veiculos.filter(v => {
+    const matchBloco = !filterBloco || v.bloco?.toString().toLowerCase().includes(filterBloco.toLowerCase());
+    const matchApto = !filterApto || v.apto?.toString().toLowerCase().includes(filterApto.toLowerCase());
+    return matchBloco && matchApto;
+  });
 
   const handleOpen = (veiculo?: Veiculo) => {
     if (veiculo) {
@@ -70,11 +78,32 @@ const Veiculos = () => {
         </Button>
       </PageHeader>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Filtrar Bloco</Label>
+          <Input
+            placeholder="Buscar por bloco..."
+            value={filterBloco}
+            onChange={(e) => setFilterBloco(e.target.value)}
+            className="bg-secondary/50 border-border/50 rounded-xl"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Filtrar Apartamento</Label>
+          <Input
+            placeholder="Buscar por apartamento..."
+            value={filterApto}
+            onChange={(e) => setFilterApto(e.target.value)}
+            className="bg-secondary/50 border-border/50 rounded-xl"
+          />
+        </div>
+      </div>
+
       <DataTable
-        data={veiculos}
+        data={displayData}
         columns={columns}
-        searchPlaceholder="Buscar placa ou modelo..."
-        searchKey="placa"
+        searchPlaceholder="Buscar placa, modelo, cor, morador ou unidade..."
+        searchKey={["placa", "modelo", "cor", "morador", "apto", "bloco"]}
         actions={(item) => (
           <div className="flex items-center gap-1 justify-end">
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground" onClick={() => handleOpen(item)}>

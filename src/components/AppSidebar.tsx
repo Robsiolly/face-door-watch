@@ -19,14 +19,14 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ['portaria', 'admin', 'morador'] },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ['portaria', 'admin'] },
   { title: "Portaria", url: "/portaria", icon: ScanFace, roles: ['portaria', 'admin'] },
   { title: "Moradores", url: "/moradores", icon: Users, roles: ['portaria', 'admin'] },
   { title: "Visitantes", url: "/visitantes", icon: UserCheck, roles: ['portaria', 'admin'] },
   { title: "Prestadores", url: "/prestadores", icon: Wrench, roles: ['portaria', 'admin'] },
   { title: "Veículos", url: "/veiculos", icon: Car, roles: ['portaria', 'admin'] },
-  { title: "Encomendas", url: "/encomendas", icon: Package, roles: ['portaria', 'admin', 'morador'] },
-  { title: "Ocorrências", url: "/ocorrencias", icon: AlertTriangle, roles: ['portaria', 'admin', 'morador'] },
+  { title: "Encomendas", url: "/encomendas", icon: Package, roles: ['portaria', 'admin'] },
+  { title: "Ocorrências", url: "/ocorrencias", icon: AlertTriangle, roles: ['portaria', 'admin'] },
   { title: "Relatórios", url: "/relatorios", icon: BarChart3, roles: ['portaria', 'admin'] },
   { title: "Configurações", url: "/configuracoes", icon: Settings, roles: ['portaria', 'admin'] },
 ];
@@ -41,76 +41,81 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
   const { user, logout } = useAuth();
 
   const filteredItems = navItems.filter(item => user && item.roles.includes(user.role));
-  // In drawer mode, never collapse
   const isCollapsed = isDrawer ? false : collapsed;
 
   return (
     <aside
       className={`
-        ${isCollapsed ? "w-[72px]" : "w-64"}
-        ${isDrawer ? "h-full" : "h-screen sticky top-0"}
-        flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 z-50
+        ${isCollapsed ? "w-[80px]" : "w-80"}
+        ${isDrawer ? "h-full" : "h-screen"}
+        flex flex-col glass-3d border-r border-white/5 transition-all duration-700 z-50
       `}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
-          <Shield className="w-5 h-5 text-primary-foreground" />
+      <div className="flex items-center gap-4 px-6 h-20 border-b border-white/5 shrink-0 overflow-hidden">
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform hover:rotate-12 duration-500">
+          <img src="/favicon.svg" alt="OTREBOR Logo" className="w-full h-full object-contain" />
         </div>
         {!isCollapsed && (
-          <div className="overflow-hidden">
-            <h1 className="text-sm font-bold text-foreground tracking-tight">OTREBOR</h1>
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-none mt-1">Watch</p>
+          <div className="overflow-hidden reveal-scale space-y-0.5">
+            <h1 className="text-base font-black text-foreground tracking-[0.3em] uppercase gold-text">OTREBOR</h1>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none opacity-40">Intelligence</p>
+            </div>
           </div>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 py-10 px-4 space-y-3 overflow-y-auto custom-scrollbar">
         {filteredItems.map((item) => (
           <NavLink
             key={item.url}
             to={item.url}
             end={item.url === "/"}
             onClick={onNavItemClick}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors text-sm"
-            activeClassName="bg-primary/10 text-primary font-medium"
+            className="flex items-center gap-4 px-5 py-4 rounded-2xl text-muted-foreground/60 border border-transparent hover:bg-white/[0.03] hover:border-white/5 hover:text-primary transition-all duration-500 text-[10px] font-black uppercase tracking-[0.2em] group"
+            activeClassName="bg-primary/10 text-primary border-primary/20 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
           >
-            <item.icon className="w-5 h-5 shrink-0" />
-            {!isCollapsed && <span>{item.title}</span>}
+            <item.icon className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110 group-active:scale-90" />
+            {!isCollapsed && <span className="transition-all">{item.title}</span>}
           </NavLink>
         ))}
       </nav>
 
       {/* User Info & Actions */}
-      <div className="p-2 space-y-2 border-t border-sidebar-border shrink-0">
+      <div className="p-4 space-y-4 border-t border-white/5 shrink-0">
         {!isCollapsed && user && (
-          <div className="px-3 py-2 rounded-xl bg-secondary/30 mb-2">
-            <p className="text-xs font-bold text-foreground line-clamp-1">{user.name}</p>
-            <p className="text-[10px] text-muted-foreground uppercase font-bold">
-              {user.role === 'morador' ? `Bloco ${user.bloco} • Ap ${user.apto}` : user.role}
+          <div className="px-4 py-3 rounded-2xl bg-white/5 border border-white/5 group transition-colors hover:bg-white/10">
+            <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
+              {user.role === 'admin' ? 'Administrador' : 'Portaria'}
             </p>
+            <p className="text-xs font-bold text-foreground line-clamp-1">{user.name}</p>
           </div>
         )}
 
-        <button
-          onClick={() => { logout(); onNavItemClick?.(); }}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-colors text-sm font-medium"
-        >
-          <LogOut className="w-5 h-5 shrink-0" />
-          {!isCollapsed && <span>Sair do Sistema</span>}
-        </button>
+        <div className="flex flex-col gap-2">
+          {!isDrawer && (
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="flex items-center justify-center h-12 w-full rounded-2xl text-muted-foreground hover:text-primary hover:bg-white/5 transition-all duration-500"
+            >
+              {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+            </button>
+          )}
 
-        {/* Collapse toggle only on desktop, not in drawer mode */}
-        {!isDrawer && (
           <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="flex items-center justify-center h-10 w-full rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            onClick={() => { logout(); onNavItemClick?.(); }}
+            className="flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all duration-500 text-xs font-black uppercase tracking-widest"
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            <LogOut className="w-5 h-5 shrink-0" />
+            {!isCollapsed && <span>Sair do Sistema</span>}
           </button>
-        )}
+        </div>
       </div>
     </aside>
   );
 }
+
+

@@ -22,30 +22,17 @@ const Ocorrencias = () => {
   const [editingOcorrencia, setEditingOcorrencia] = useState<Ocorrencia | null>(null);
   const [formData, setFormData] = useState<Partial<Ocorrencia>>({});
 
-  const isMorador = user?.role === 'morador';
+  const [filterBloco, setFilterBloco] = useState("");
+  const [filterApto, setFilterApto] = useState("");
 
-  // Filtro de privacidade
-  const displayData = isMorador
-    ? ocorrencias.filter(o => o.bloco === user.bloco && o.apto === user.apto)
-    : ocorrencias;
+  // Filtro de blocos e unidades
+  const displayData = ocorrencias.filter(o => {
+    const matchBloco = !filterBloco || o.bloco?.toString().toLowerCase().includes(filterBloco.toLowerCase());
+    const matchApto = !filterApto || o.apto?.toString().toLowerCase().includes(filterApto.toLowerCase());
+    return matchBloco && matchApto;
+  });
 
   const handleOpen = (ocorrencia?: Ocorrencia) => {
-    if (isMorador && !ocorrencia) {
-      // Permitir que morador registre sua própria ocorrência
-      setEditingOcorrencia(null);
-      setFormData({
-        status: 'pending',
-        data: new Date().toLocaleDateString('pt-BR'),
-        bloco: user.bloco,
-        apto: user.apto,
-        responsavel: user.name
-      });
-      setIsOpen(true);
-      return;
-    }
-
-    if (isMorador && ocorrencia) return; // Morador não edita
-
     if (ocorrencia) {
       setEditingOcorrencia(ocorrencia);
       setFormData(ocorrencia);
@@ -121,12 +108,33 @@ const Ocorrencias = () => {
         </Button>
       </PageHeader>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Filtrar Bloco</Label>
+          <Input
+            placeholder="Buscar por bloco..."
+            value={filterBloco}
+            onChange={(e) => setFilterBloco(e.target.value)}
+            className="bg-secondary/50 border-border/50 rounded-xl"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Filtrar Apartamento</Label>
+          <Input
+            placeholder="Buscar por apartamento..."
+            value={filterApto}
+            onChange={(e) => setFilterApto(e.target.value)}
+            className="bg-secondary/50 border-border/50 rounded-xl"
+          />
+        </div>
+      </div>
+
       <DataTable
         data={displayData}
         columns={columns}
-        searchPlaceholder="Buscar ocorrência..."
-        searchKey="descricao"
-        actions={!isMorador ? (item) => (
+        searchPlaceholder="Buscar por tipo, descrição ou unidade (Ap/Bl)..."
+        searchKey={["tipo", "descricao", "bloco", "apartamento"]}
+        actions={(item) => (
           <div className="flex items-center gap-1 justify-end">
             <Button
               variant="ghost"
@@ -144,7 +152,7 @@ const Ocorrencias = () => {
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
-        ) : undefined}
+        )}
       />
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>

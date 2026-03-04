@@ -39,7 +39,7 @@ const Moradores = () => {
     setEditingPerson(undefined);
   };
 
-  const sendWhatsAppInvite = (person: Person) => {
+  const sendWhatsAppMessage = (person: Person) => {
     if (!person.telefone) {
       toast({
         title: "Telefone não encontrado",
@@ -49,13 +49,8 @@ const Moradores = () => {
       return;
     }
 
-    const b = person.bloco || '';
-    const a = person.apartamento || '';
-    const n = encodeURIComponent(person.nome);
-    const magicLink = `${window.location.origin}/?b=${b}&a=${a}&n=${n}`;
-
     const phone = person.telefone.replace(/\D/g, '');
-    const message = `Olá ${person.nome}, há uma correspondência na portaria para você. Favor retirar assim que possível.`;
+    const message = `Olá ${person.nome}, esta é uma mensagem da portaria do condomínio.`;
     const url = `whatsapp://send?phone=55${phone}&text=${encodeURIComponent(message)}`;
 
     window.location.href = url;
@@ -119,30 +114,18 @@ const Moradores = () => {
       <DataTable
         data={data}
         columns={columns}
-        searchPlaceholder="Buscar morador..."
+        searchPlaceholder="Buscar por nome ou documento..."
+        searchKey={["nome", "documento"]}
         actions={(item: Person) => (
           <div className="flex items-center gap-1 justify-end">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-lg text-green-500 hover:text-green-600 hover:bg-green-50"
-              onClick={() => sendWhatsAppInvite(item)}
-              title="Convidar via WhatsApp"
+              className="h-8 w-8 rounded-lg text-primary hover:text-primary/80 hover:bg-primary/10"
+              onClick={() => sendWhatsAppMessage(item)}
+              title="Enviar mensagem via WhatsApp"
             >
               <MessageCircle className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-lg text-primary/70 hover:text-primary hover:bg-primary/10"
-              title="Copiar Link de Acesso"
-              onClick={() => {
-                const url = `${window.location.origin}/?b=${item.bloco || ''}&a=${item.apartamento || ''}&n=${encodeURIComponent(item.nome)}`;
-                navigator.clipboard.writeText(url);
-                toast({ title: "Link Copiado!", description: `Link de acesso para ${item.nome} pronto para envio.` });
-              }}
-            >
-              <Plus className="w-4 h-4 rotate-45" />
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground" onClick={() => handleViewDetails(item)}>
               <Eye className="w-4 h-4" />

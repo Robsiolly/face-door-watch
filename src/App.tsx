@@ -22,7 +22,18 @@ import Login from "./pages/Login";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: string[] }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#050507]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/50">Validando Credenciais...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) return <Login />;
 

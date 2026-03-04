@@ -2,7 +2,8 @@ const CACHE_NAME = 'otrebor-v1';
 const ASSETS = [
     '/',
     '/index.html',
-    '/manifest.json'
+    '/manifest.json',
+    '/favicon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -46,8 +47,8 @@ self.addEventListener('push', (event) => {
 
     const options = {
         body: data.body,
-        icon: 'https://cdn-icons-png.flaticon.com/512/3662/3662817.png',
-        badge: 'https://cdn-icons-png.flaticon.com/512/3662/3662817.png',
+        icon: '/favicon.svg',
+        badge: '/favicon.svg',
         vibrate: [100, 50, 100],
         data: {
             dateOfArrival: Date.now(),

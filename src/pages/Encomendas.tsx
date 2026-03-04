@@ -22,19 +22,27 @@ const Encomendas = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingEncomenda, setEditingEncomenda] = useState<Encomenda | null>(null);
   const [formData, setFormData] = useState<Partial<Encomenda>>({});
+  const [filterBloco, setFilterBloco] = useState("");
+  const [filterApto, setFilterApto] = useState("");
 
-  const isMorador = user?.role === 'morador';
+  // Resumo de encomendas pendentes agrupadas por bloco/apto
+  const pendingSummary = encomendas
+    .filter(e => e.status === 'pending')
+    .reduce((acc, curr) => {
+      const key = `${curr.bloco || 'S/B'}-${curr.apto || 'S/A'}`;
+      if (!acc[key]) acc[key] = { block: curr.bloco, apto: curr.apto, count: 0, items: [] };
+      acc[key].count++;
+      acc[key].items.push(curr.descricao);
+      return acc;
+    }, {} as Record<string, { block: string, apto: string, count: number, items: string[] }>);
 
-  // Filtrar se for morador (Normalizando para evitar erros de caixa/espaço)
-  const displayData = isMorador
-    ? encomendas.filter(e =>
-      e.bloco?.toString().toLowerCase().trim() === user.bloco?.toString().toLowerCase().trim() &&
-      e.apto?.toString().toLowerCase().trim() === user.apto?.toString().toLowerCase().trim()
-    )
-    : encomendas;
+  const displayData = encomendas.filter(e => {
+    const matchBloco = !filterBloco || e.bloco?.toString().toLowerCase().includes(filterBloco.toLowerCase());
+    const matchApto = !filterApto || e.apto?.toString().toLowerCase().includes(filterApto.toLowerCase());
+    return matchBloco && matchApto;
+  });
 
   const handleOpen = (encomenda?: Encomenda) => {
-    if (isMorador) return; // Morador não cria/edita
     if (encomenda) {
       setEditingEncomenda(encomenda);
       setFormData(encomenda);
@@ -89,14 +97,12 @@ const Encomendas = () => {
   };
 
   const toggleStatus = async (item: Encomenda) => {
-    if (isMorador) return;
     const newStatus = item.status === 'active' ? 'pending' : 'active';
     await updateEncomenda(item.id, { status: newStatus });
     toast({ title: "Status alterado", description: newStatus === 'active' ? "Encomenda marcada como retirada." : "Encomenda pendente." });
   };
 
   const sendWhatsApp = (item: Encomenda) => {
-    // Tenta encontrar o morador pelo nome ou bloco/apto para pegar o telefone
     const morador = people.find(p =>
       p.type === 'morador' &&
       p.bloco === item.bloco &&
@@ -119,20 +125,7 @@ const Encomendas = () => {
     window.location.href = url;
   };
 
-  const columns = isMorador ? [
-    { key: "descricao", label: "Correspondência" },
-    { key: "dataRecebimento", label: "Data" },
-    {
-      key: "status",
-      label: "Situação",
-      render: (item: Encomenda) => (
-        <StatusBadge
-          status={item.status}
-          label={item.status === "active" ? "Retirado" : "Disponível na Portaria"}
-        />
-      ),
-    },
-  ] : [
+  const columns = [
     {
       key: "morador_info",
       label: "Destinatário",
@@ -157,19 +150,72 @@ const Encomendas = () => {
   return (
     <AppLayout>
       <PageHeader title="Encomendas" subtitle="Gestão de recebimentos">
-        {!isMorador && (
-          <Button className="h-10 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground gap-2" onClick={() => handleOpen()}>
-            <Plus className="w-4 h-4" /> Registrar
-          </Button>
-        )}
+        <Button className="h-10 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground gap-2" onClick={() => handleOpen()}>
+          <Plus className="w-4 h-4" /> Registrar
+        </Button>
       </PageHeader>
+
+      {Object.keys(pendingSummary).length > 0 && (
+        <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+            <PackageCheck className="w-4 h-4 text-primary" /> Encomendas Pendentes por Unidade
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(pendingSummary).map(([key, data]) => (
+              <div
+                key={key}
+                className="glass-card p-3 flex flex-col items-center justify-center min-w-[100px] border-primary/20 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-colors"
+                onClick={() => {
+                  setFilterBloco(data.block || "");
+                  setFilterApto(data.apto || "");
+                }}
+              >
+                <p className="text-[10px] text-muted-foreground font-bold uppercase">Bl {data.block} - Ap {data.apto}</p>
+                <p className="text-xl font-black text-primary">{data.count}</p>
+                <p className="text-[9px] text-primary/70 font-medium">PENDENTE(S)</p>
+              </div>
+            ))}
+            {(filterBloco || filterApto) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto py-2 px-3 text-xs text-muted-foreground hover:text-destructive"
+                onClick={() => { setFilterBloco(""); setFilterApto(""); }}
+              >
+                Limpar Filtros
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Filtrar Bloco</Label>
+          <Input
+            placeholder="Ex: A, 1, Norte..."
+            value={filterBloco}
+            onChange={(e) => setFilterBloco(e.target.value)}
+            className="bg-secondary/50 border-border/50 rounded-xl"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Filtrar Apartamento</Label>
+          <Input
+            placeholder="Ex: 101, 12-B..."
+            value={filterApto}
+            onChange={(e) => setFilterApto(e.target.value)}
+            className="bg-secondary/50 border-border/50 rounded-xl"
+          />
+        </div>
+      </div>
 
       <DataTable
         data={displayData}
         columns={columns}
-        searchPlaceholder="Buscar por morador ou descrição..."
-        searchKey="morador"
-        actions={!isMorador ? (item) => (
+        searchPlaceholder="Buscar por morador, descrição ou unidade (Ap/Bl)..."
+        searchKey={["morador", "descricao", "apto", "bloco"]}
+        actions={(item) => (
           <div className="flex items-center gap-1 justify-end">
             <Button
               variant="ghost"
@@ -183,7 +229,7 @@ const Encomendas = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-lg text-green-500 hover:text-green-600 hover:bg-green-50"
+              className="h-8 w-8 rounded-lg text-primary hover:text-primary/80 hover:bg-primary/10"
               onClick={() => sendWhatsApp(item)}
               title="Notificar via WhatsApp"
             >
@@ -196,7 +242,7 @@ const Encomendas = () => {
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
-        ) : undefined}
+        )}
       />
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -252,7 +298,7 @@ const Encomendas = () => {
             <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
             <Button
               variant="outline"
-              className="text-green-600 border-green-200 hover:bg-green-50 gap-2"
+              className="text-primary border-primary/20 hover:bg-primary/10 gap-2"
               onClick={() => sendWhatsApp(formData as Encomenda)}
             >
               <MessageCircle className="w-4 h-4" /> Notificar WhatsApp

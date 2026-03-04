@@ -1,160 +1,350 @@
-import { useState } from "react";
-import { useAuth, UserRole } from "@/contexts/AuthContext";
+import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Home, Building2, User } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield, User, Lock, Activity, ArrowRight, Chrome, ScanFace, Camera, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { BackgroundEffects } from "@/components/BackgroundEffects";
+import { useToast } from "@/components/ui/use-toast";
+import { getFaceDescriptor, loadFaceApi } from "@/lib/faceApi";
 
 const Login = () => {
-    const { login } = useAuth();
+    const { login, loginWithGoogle, loginWithFace, registerWithFace, isAuthenticated, loading } = useAuth();
     const navigate = useNavigate();
-    const [role, setRole] = useState<UserRole>("portaria");
-    const [formData, setFormData] = useState({
-        bloco: "",
-        apto: "",
-        nome: "",
-        password: ""
-    });
+    const { toast } = useToast();
 
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        login({
-            role,
-            bloco: formData.bloco,
-            apto: formData.apto,
-            name: formData.nome,
-            password: formData.password
-        });
-        navigate("/");
+    const [mode, setMode] = useState<'login' | 'register'>('login');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [faceDescriptor, setFaceDescriptor] = useState<number[] | null>(null);
+
+    const [regForm, setRegForm] = useState({ name: "", email: "" });
+    const [loginEmail, setLoginEmail] = useState("");
+
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [showCamera, setShowCamera] = useState(false);
+    const streamRef = useRef<MediaStream | null>(null);
+
+    useEffect(() => {
+        if (isAuthenticated) navigate("/");
+        return () => stopCamera();
+    }, [isAuthenticated, navigate]);
+
+    useEffect(() => {
+        stopCamera();
+    }, [mode]);
+
+    const startCamera = async () => {
+        setShowCamera(true);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            streamRef.current = stream;
+            // Provide a small delay to ensure video element is mounted
+            setTimeout(() => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            }, 100);
+            await loadFaceApi();
+        } catch (err) {
+            toast({ title: "Erro na câmera", description: "Não foi possível acessar a webcam.", variant: "destructive" });
+            setShowCamera(false);
+        }
     };
 
-    return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-background via-secondary/20 to-background overflow-hidden relative">
-            {/* Background Decorative Elements */}
-            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] animate-pulse" />
+    const stopCamera = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+        }
+        setShowCamera(false);
+    };
 
-            <div className="w-full max-w-md z-10 animate-in fade-in zoom-in duration-500">
-                <div className="text-center mb-8">
-                    <div className="inline-flex p-3 rounded-2xl bg-primary/20 mb-4 border border-primary/20">
-                        <Shield className="w-8 h-8 text-primary" />
+    const captureFace = async () => {
+        if (!videoRef.current) return;
+        setIsProcessing(true);
+        try {
+            const descriptor = await getFaceDescriptor(videoRef.current);
+            if (descriptor) {
+                setFaceDescriptor(descriptor as number[]);
+                toast({ title: "Biometria capturada", description: "Sua face foi processada com sucesso." });
+                stopCamera();
+            } else {
+                toast({ title: "Face não detectada", description: "Tente se posicionar melhor diante da câmera.", variant: "destructive" });
+            }
+        } catch (err) {
+            toast({ title: "Erro no processamento", description: "Houve um problema ao processar sua face.", variant: "destructive" });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!faceDescriptor) {
+            toast({ title: "Biometria necessária", description: "Capture seu reconhecimento facial para prosseguir.", variant: "destructive" });
+            return;
+        }
+        setIsProcessing(true);
+        try {
+            await registerWithFace({ ...regForm, descriptor: faceDescriptor });
+            toast({ title: "Cadastro realizado", description: "Bem-vindo ao ecossistema OTREBOR." });
+            setMode('login');
+            setFaceDescriptor(null);
+            setRegForm({ name: "", email: "" });
+        } catch (err) {
+            toast({ title: "Erro no cadastro", description: "Verifique se o e-mail já está em uso.", variant: "destructive" });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleBiometricLogin = async () => {
+        if (!videoRef.current) {
+            await startCamera();
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            await loadFaceApi();
+            const descriptor = await getFaceDescriptor(videoRef.current);
+
+            if (descriptor) {
+                const success = await loginWithFace(descriptor as number[]);
+                if (success) {
+                    toast({ title: "Acesso autorizado", description: "Identidade confirmada via biometria." });
+                    stopCamera();
+                } else {
+                    toast({ title: "Acesso negado", description: "Identidade não encontrada no sistema.", variant: "destructive" });
+                }
+            } else {
+                toast({ title: "Face não detectada", description: "Posicione-se melhor diante da câmera.", variant: "destructive" });
+            }
+        } catch (err) {
+            toast({ title: "Erro biométrico", description: "Não foi possível realizar o reconhecimento facial.", variant: "destructive" });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen w-full flex items-center justify-center bg-[#050507]">
+                <div className="flex flex-col items-center gap-4">
+                    <Activity className="w-12 h-12 text-primary animate-spin" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/50">Neural Identity Check...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center p-6 overflow-hidden relative selection:bg-primary/30">
+            <BackgroundEffects />
+
+            <div className="w-full max-w-[520px] z-10 space-y-10">
+                {/* Header */}
+                <div className="text-center space-y-6 reveal-up">
+                    <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/10 mb-2">
+                        <ScanFace className="w-4 h-4 text-primary animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/80">Otrebor Biometric Protocol</span>
                     </div>
-                    <h1 className="text-3xl font-extrabold tracking-tight">Otrebor Watch</h1>
-                    <p className="text-muted-foreground mt-2 font-medium italic">Segurança e Conectividade para seu Condomínio</p>
+
+                    <div className="flex flex-col items-center">
+                        <img src="/favicon.svg" alt="Logo" className="w-24 h-24 mb-6 hover:scale-110 transition-transform duration-700" />
+                        <h1 className="text-6xl font-black tracking-tighter gold-text uppercase mb-1">Otrebor</h1>
+                        <p className="text-muted-foreground font-black tracking-[0.5em] text-[10px] uppercase opacity-40">Intelligence & Defense</p>
+                    </div>
                 </div>
 
-                <Card className="glass-card border-white/10 shadow-2xl">
-                    <CardHeader>
-                        <CardTitle className="text-xl">Identificação</CardTitle>
-                        <CardDescription>Escolha como deseja acessar o sistema</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Tabs defaultValue="portaria" className="w-full" onValueChange={(v) => setRole(v as UserRole)}>
-                            <TabsList className="grid w-full grid-cols-2 mb-8 bg-secondary/50 p-1 rounded-xl">
-                                <TabsTrigger value="portaria" className="rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                                    <Building2 className="w-4 h-4" /> Portaria
-                                </TabsTrigger>
-                                <TabsTrigger value="morador" className="rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                                    <Home className="w-4 h-4" /> Morador
-                                </TabsTrigger>
-                            </TabsList>
+                {/* Main Card */}
+                <div className="reveal-scale" style={{ animationDelay: '0.2s' }}>
+                    <Card className="premium-card bg-black/60 backdrop-blur-[60px] border-white/5 rounded-[40px] overflow-hidden">
+                        <div className="flex border-b border-white/5">
+                            <button
+                                onClick={() => setMode('login')}
+                                className={`flex-1 py-5 text-[11px] font-black uppercase tracking-[0.3em] transition-all ${mode === 'login' ? 'text-primary' : 'text-muted-foreground hover:text-white'}`}
+                            >
+                                Login
+                            </button>
+                            <button
+                                onClick={() => setMode('register')}
+                                className={`flex-1 py-5 text-[11px] font-black uppercase tracking-[0.3em] transition-all ${mode === 'register' ? 'text-primary' : 'text-muted-foreground hover:text-white'}`}
+                            >
+                                Cadastro
+                            </button>
+                        </div>
 
-                            <form onSubmit={handleLogin} className="space-y-4">
-                                <TabsContent value="portaria" className="mt-0 space-y-4 animate-in slide-in-from-left-2 duration-300">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="nome-portaria" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nome do Operador</Label>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                            <Input
-                                                id="nome-portaria"
-                                                placeholder="Digite seu nome..."
-                                                className="pl-10 h-11 rounded-xl glass bg-secondary/30"
-                                                value={formData.nome}
-                                                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                                                required
-                                            />
-                                        </div>
+                        <CardContent className="p-10 space-y-8">
+                            {mode === 'login' ? (
+                                <div className="space-y-8">
+                                    <div className="text-center space-y-2">
+                                        <CardTitle className="text-3xl font-black">Autenticação Neural</CardTitle>
+                                        <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Posicione-se diante do sensor biométrico</CardDescription>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="pass-portaria" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Senha de Acesso</Label>
-                                        <Input
-                                            id="pass-portaria"
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="h-11 rounded-xl glass bg-secondary/30"
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                </TabsContent>
 
-                                <TabsContent value="morador" className="mt-0 space-y-4 animate-in slide-in-from-right-2 duration-300">
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-6">
+                                        {showCamera ? (
+                                            <div className="relative aspect-video rounded-[32px] overflow-hidden border-2 border-primary/30 bg-black group">
+                                                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 border-[20px] border-black/20 pointer-events-none" />
+                                                <div className="absolute inset-x-0 bottom-6 flex justify-center">
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleBiometricLogin}
+                                                        disabled={isProcessing}
+                                                        className="rounded-full w-16 h-16 bg-primary hover:bg-primary/90 border-4 border-white/20 shadow-2xl flex items-center justify-center group"
+                                                    >
+                                                        {isProcessing ? (
+                                                            <Activity className="w-8 h-8 text-black animate-spin" />
+                                                        ) : (
+                                                            <ScanFace className="w-8 h-8 text-black group-hover:scale-110 transition-transform" />
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                                <div className="absolute top-4 right-4 group-hover:opacity-100 opacity-0 transition-opacity">
+                                                    <Button variant="ghost" size="icon" onClick={stopCamera} className="rounded-full bg-black/40 text-white hover:bg-black/60">
+                                                        <Activity className="w-4 h-4 rotate-45" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <Button
+                                                onClick={startCamera}
+                                                disabled={isProcessing}
+                                                className="h-32 w-full rounded-[32px] bg-primary text-black hover:bg-primary/90 transition-all duration-500 font-black text-xs uppercase tracking-[0.3em] flex flex-col gap-2 group shadow-[0_15px_40px_rgba(191,149,63,0.3)]"
+                                            >
+                                                <Camera className="w-10 h-10 group-hover:scale-125 transition-transform duration-500" />
+                                                Ativar Scanner de Face
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    <p className="text-[10px] text-center font-black uppercase tracking-[0.2em] text-muted-foreground/40 italic">
+                                        "Seu rosto é sua chave mestre no ecossistema OTREBOR"
+                                    </p>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleRegister} className="space-y-8">
+                                    <div className="text-center space-y-2">
+                                        <CardTitle className="text-3xl font-black">Nova Identidade</CardTitle>
+                                        <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Siga o protocolo para liberar seu acesso</CardDescription>
+                                    </div>
+
+                                    <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label htmlFor="bloco" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Bloco</Label>
-                                            <Input
-                                                id="bloco"
-                                                placeholder="Ex: A"
-                                                className="h-11 rounded-xl glass bg-secondary/30"
-                                                value={formData.bloco}
-                                                onChange={(e) => setFormData({ ...formData, bloco: e.target.value })}
-                                                required={role === 'morador'}
-                                            />
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-3">Nome Completo</Label>
+                                            <div className="relative">
+                                                <User className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                                                <Input
+                                                    required
+                                                    className="pl-14 h-16 rounded-[24px] bg-white/[0.03] border-white/5 focus:border-primary/20 text-base font-bold"
+                                                    placeholder="Como devemos chamá-lo?"
+                                                    value={regForm.name}
+                                                    onChange={e => setRegForm({ ...regForm, name: e.target.value })}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="apto" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Apartamento</Label>
-                                            <Input
-                                                id="apto"
-                                                placeholder="Ex: 101"
-                                                className="h-11 rounded-xl glass bg-secondary/30"
-                                                value={formData.apto}
-                                                onChange={(e) => setFormData({ ...formData, apto: e.target.value })}
-                                                required={role === 'morador'}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="nome-morador" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nome Completo</Label>
-                                        <Input
-                                            id="nome-morador"
-                                            placeholder="Seu nome..."
-                                            className="h-11 rounded-xl glass bg-secondary/30"
-                                            value={formData.nome}
-                                            onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                                            required={role === 'morador'}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="pass-morador" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Senha Individual</Label>
-                                        <Input
-                                            id="pass-morador"
-                                            type="password"
-                                            placeholder="Crie ou digite sua senha"
-                                            className="h-11 rounded-xl glass bg-secondary/30"
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                            required={role === 'morador'}
-                                        />
-                                    </div>
-                                </TabsContent>
 
-                                <Button type="submit" className="w-full h-12 rounded-xl text-lg font-bold shadow-lg shadow-primary/20">
-                                    Acessar Sistema
-                                </Button>
-                            </form>
-                        </Tabs>
-                    </CardContent>
-                    <CardFooter className="flex justify-center border-t border-white/5 pt-6">
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-2">
-                            <span className="w-1 h-1 rounded-full bg-primary" /> Sistema de Vigilância • v1.0
-                        </p>
-                    </CardFooter>
-                </Card>
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-3">E-mail Corporativo</Label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                                                <Input
+                                                    required
+                                                    type="email"
+                                                    className="pl-14 h-16 rounded-[24px] bg-white/[0.03] border-white/5 focus:border-primary/20 text-base font-bold"
+                                                    placeholder="exemplo@otrebor.ai"
+                                                    value={regForm.email}
+                                                    onChange={e => setRegForm({ ...regForm, email: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-3">Reconhecimento Facial</Label>
+
+                                            {showCamera ? (
+                                                <div className="relative aspect-video rounded-[32px] overflow-hidden border-2 border-primary/30 bg-black">
+                                                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-x-0 bottom-4 flex justify-center">
+                                                        <Button
+                                                            type="button"
+                                                            onClick={captureFace}
+                                                            disabled={isProcessing}
+                                                            className="rounded-full w-14 h-14 bg-red-500 hover:bg-red-600 border-4 border-white/20 shadow-2xl animate-pulse"
+                                                        >
+                                                            <Camera className="w-6 h-6" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    type="button"
+                                                    onClick={startCamera}
+                                                    className={`w-full h-32 rounded-[32px] border-2 border-dashed ${faceDescriptor ? 'border-primary/50 bg-primary/5' : 'border-white/10 bg-white/[0.02]'} hover:bg-white/[0.05] transition-all flex flex-col items-center justify-center gap-2 group`}
+                                                >
+                                                    {faceDescriptor ? (
+                                                        <>
+                                                            <ScanFace className="w-10 h-10 text-primary" />
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Biometria Pronta</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Camera className="w-10 h-10 text-white/20 group-hover:text-primary transition-colors" />
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ativar Sensor de Face</span>
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        disabled={isProcessing || !faceDescriptor}
+                                        className="btn-premium w-full h-18 rounded-[28px] group"
+                                    >
+                                        Confirmar Cadastro
+                                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-all" />
+                                    </Button>
+                                </form>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <p className="text-[10px] text-center font-black uppercase tracking-[0.4em] text-muted-foreground/30 px-10 leading-loose">
+                    Processado via Motor Biométrico OTREBOR. Criptografia ponta-a-ponta ativada.
+                </p>
             </div>
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .btn-premium {
+                    background: var(--gold-gradient);
+                    color: black;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    letter-spacing: 0.2em;
+                    font-size: 0.75rem;
+                    box-shadow: 0 10px 40px rgba(191,149,63,0.3);
+                    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .btn-premium:hover {
+                    box-shadow: 0 15px 50px rgba(191,149,63,0.4);
+                    transform: translateY(-2px) scale(1.02);
+                }
+                .btn-premium:disabled {
+                    opacity: 0.3;
+                    filter: grayscale(1);
+                }
+            `}} />
         </div>
     );
 };

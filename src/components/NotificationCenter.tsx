@@ -65,8 +65,8 @@ export function NotificationCenter() {
                         navigator.serviceWorker.ready.then(registration => {
                             registration.showNotification(newNotif.title, {
                                 body: newNotif.message,
-                                icon: 'https://cdn-icons-png.flaticon.com/512/3662/3662817.png',
-                                badge: 'https://cdn-icons-png.flaticon.com/512/3662/3662817.png',
+                                icon: '/favicon.svg',
+                                badge: '/favicon.svg',
                                 vibrate: [200, 100, 200],
                                 tag: newNotif.id,
                                 data: { url: window.location.origin + '/encomendas' }
@@ -99,9 +99,9 @@ export function NotificationCenter() {
 
     const getIcon = (type: AppNotification['type']) => {
         switch (type) {
-            case 'encomenda': return <Package className="w-4 h-4 text-blue-500" />;
-            case 'visitante': return <User className="w-4 h-4 text-green-500" />;
-            case 'ocorrencia': return <AlertTriangle className="w-4 h-4 text-red-500" />;
+            case 'encomenda': return <Package className="w-4 h-4 text-muted-foreground" />;
+            case 'visitante': return <User className="w-4 h-4 text-primary" />;
+            case 'ocorrencia': return <AlertTriangle className="w-4 h-4 text-destructive" />;
             default: return <ShieldCheck className="w-4 h-4 text-primary" />;
         }
     };

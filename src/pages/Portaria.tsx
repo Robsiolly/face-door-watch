@@ -96,11 +96,9 @@ const Portaria = () => {
   }, [stream]);
 
   const handleScan = async () => {
-    if (!stream || !videoRef.current) return;
+    if (!stream || !videoRef.current || isScanning || foundPerson || unrecognized) return;
 
     setIsScanning(true);
-    setFoundPerson(null);
-    setUnrecognized(false);
 
     try {
       // Pequena pausa para garantir que o frame está pronto
@@ -110,7 +108,6 @@ const Portaria = () => {
 
       if (!currentDescriptor) {
         setIsScanning(false);
-        toast({ title: "Rosto não encontrado", description: "Posicione-se melhor à frente da câmera.", variant: "destructive" });
         return;
       }
 
@@ -146,11 +143,20 @@ const Portaria = () => {
       }
     } catch (err) {
       console.error("Scan error:", err);
-      toast({ title: "Erro", description: "Houve um problema no reconhecimento.", variant: "destructive" });
     } finally {
       setIsScanning(false);
     }
   };
+
+  useEffect(() => {
+    if (!stream || isCameraLoading || foundPerson || unrecognized) return;
+
+    const interval = setInterval(() => {
+      handleScan();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [stream, isCameraLoading, foundPerson, unrecognized, people]);
 
   const clearState = () => {
     setFoundPerson(null);
@@ -161,8 +167,8 @@ const Portaria = () => {
     <AppLayout>
       <PageHeader title="Portaria" subtitle="Monitoramento em tempo real">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-xs text-primary font-medium">SISTEMA ATIVO</span>
+          <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-pulse" />
+          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Sistema Ativo</span>
         </div>
       </PageHeader>
 
@@ -193,7 +199,7 @@ const Portaria = () => {
             {isScanning && (
               <div className="absolute inset-0 pointer-events-none z-10">
                 <div className="absolute inset-0 border-[8px] border-primary/40 animate-pulse" />
-                <div className="absolute top-1/2 left-0 w-full h-[2px] bg-primary/60 shadow-[0_0_15px_rgba(34,197,94,0.8)] animate-scan-line" />
+                <div className="absolute top-1/2 left-0 w-full h-[3px] gold-liquid shadow-[0_0_20px_rgba(191,149,63,0.8)] animate-scan-line" />
               </div>
             )}
 
@@ -230,13 +236,13 @@ const Portaria = () => {
                       {foundPerson?.photo ? (
                         <div className="mb-4 relative">
                           <img src={foundPerson.photo} alt={foundPerson.nome} className="w-24 h-24 rounded-3xl object-cover mx-auto border-4 border-primary/20 shadow-xl" />
-                          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground border-4 border-background">
+                          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full gold-liquid flex items-center justify-center text-primary-foreground border-4 border-background shadow-lg">
                             <Check className="w-4 h-4" />
                           </div>
                         </div>
                       ) : (
-                        <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 border-2 border-primary/30">
-                          <Check className="w-12 h-12 text-primary" />
+                        <div className="w-24 h-24 rounded-full gold-liquid flex items-center justify-center mx-auto mb-4 border-2 border-white/20 shadow-xl">
+                          <Check className="w-12 h-12 text-primary-foreground" />
                         </div>
                       )}
                       <h3 className="text-2xl font-bold text-foreground mb-1">{foundPerson?.nome}</h3>
@@ -251,13 +257,15 @@ const Portaria = () => {
               </div>
             )}
 
-            {/* Bottom Bar Controls */}
-            {!isScanning && !foundPerson && !unrecognized && stream && (
-              <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4">
-                <Button onClick={handleScan} className="bg-primary hover:bg-primary/90 text-primary-foreground h-11 sm:h-14 px-5 sm:px-8 rounded-full shadow-2xl shadow-primary/40 gap-2 sm:gap-3 font-bold text-sm sm:text-lg group">
-                  <ScanFace className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
-                  <span className="hidden xs:inline">Iniciar </span>Reconhecimento
-                </Button>
+            {/* Status Overlay - Monitoramento Ativo */}
+            {!foundPerson && !unrecognized && !isCameraLoading && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                <div className="glass px-6 py-2.5 rounded-full flex items-center gap-3 border-white/10 shadow-2xl backdrop-blur-md">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(191,149,63,0.8)]" />
+                  <span className="text-[11px] font-black text-white/90 tracking-widest uppercase">
+                    Monitoramento Ativo
+                  </span>
+                </div>
               </div>
             )}
 
