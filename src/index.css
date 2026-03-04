@@ -21,8 +21,8 @@
     --secondary: 240 4.8% 10%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 4.8% 12%;
-    --muted-foreground: 240 5% 85%;
+    --muted: 240 4.8% 15%;
+    --muted-foreground: 240 5% 90%;
 
     --accent: 45 75% 55%;
     --accent-foreground: 222 47% 7%;
@@ -88,7 +88,6 @@
   body {
     @apply bg-[#050507] text-foreground antialiased selection:bg-primary/30;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    letter-spacing: -0.02em;
     overflow-x: hidden;
   }
 
@@ -97,8 +96,7 @@
   h3,
   h4,
   .font-heading {
-    letter-spacing: -0.04em;
-    font-weight: 900;
+    font-weight: 700;
   }
 
   /* Premium Minimalist Scrollbar */

@@ -58,10 +58,10 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
         </div>
         {!isCollapsed && (
           <div className="overflow-hidden reveal-scale space-y-0.5">
-            <h1 className="text-base font-black text-foreground tracking-[0.3em] uppercase gold-text">OTREBOR</h1>
+            <h1 className="text-lg font-bold text-foreground gold-text uppercase">OTREBOR</h1>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none opacity-40">Intelligence</p>
+              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider opacity-60">Intelligence</p>
             </div>
           </div>
         )}
@@ -75,8 +75,8 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
             to={item.url}
             end={item.url === "/"}
             onClick={onNavItemClick}
-            className="flex items-center gap-4 px-5 py-4 rounded-2xl text-muted-foreground/60 border border-transparent hover:bg-white/[0.03] hover:border-white/5 hover:text-primary transition-all duration-500 text-[10px] font-black uppercase tracking-[0.2em] group"
-            activeClassName="bg-primary/10 text-primary border-primary/20 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
+            className="flex items-center gap-4 px-5 py-4 rounded-2xl text-muted-foreground border border-transparent hover:bg-white/[0.05] hover:border-white/10 hover:text-white transition-all duration-500 text-xs font-semibold uppercase tracking-wider group"
+            activeClassName="bg-primary/20 text-primary border-primary/30 shadow-[0_0_20px_rgba(212,175,55,0.1)]"
           >
             <item.icon className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110 group-active:scale-90" />
             {!isCollapsed && <span className="transition-all">{item.title}</span>}
@@ -88,10 +88,10 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
       <div className="p-4 space-y-4 border-t border-white/5 shrink-0">
         {!isCollapsed && user && (
           <div className="px-4 py-3 rounded-2xl bg-white/5 border border-white/5 group transition-colors hover:bg-white/10">
-            <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
+            <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">
               {user.role === 'admin' ? 'Administrador' : 'Portaria'}
             </p>
-            <p className="text-xs font-bold text-foreground line-clamp-1">{user.name}</p>
+            <p className="text-sm font-semibold text-foreground line-clamp-1">{user.name}</p>
           </div>
         )}
 
@@ -107,7 +107,7 @@ export function AppSidebar({ onNavItemClick, isDrawer }: AppSidebarProps) {
 
           <button
             onClick={() => { logout(); onNavItemClick?.(); }}
-            className="flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all duration-500 text-xs font-black uppercase tracking-widest"
+            className="flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl text-red-500 hover:bg-red-500/10 transition-all duration-500 text-xs font-semibold uppercase tracking-widest"
           >
             <LogOut className="w-5 h-5 shrink-0" />
             {!isCollapsed && <span>Sair do Sistema</span>}

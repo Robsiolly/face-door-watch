@@ -137,7 +137,7 @@ const Login = () => {
             <div className="min-h-screen w-full flex items-center justify-center bg-[#050507]">
                 <div className="flex flex-col items-center gap-4">
                     <Activity className="w-12 h-12 text-primary animate-spin" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/50">Neural Identity Check...</p>
+                    <p className="text-sm font-semibold uppercase tracking-wider text-primary">Verificando Identidade...</p>
                 </div>
             </div>
         );
@@ -150,15 +150,15 @@ const Login = () => {
             <div className="w-full max-w-[520px] z-10 space-y-10">
                 {/* Header */}
                 <div className="text-center space-y-6 reveal-up">
-                    <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/10 mb-2">
+                    <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-2">
                         <ScanFace className="w-4 h-4 text-primary animate-pulse" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/80">Otrebor Biometric Protocol</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-primary">Protocolo Biométrico Otrebor</span>
                     </div>
 
                     <div className="flex flex-col items-center">
                         <img src="/favicon.svg" alt="Logo" className="w-24 h-24 mb-6 hover:scale-110 transition-transform duration-700" />
-                        <h1 className="text-6xl font-black tracking-tighter gold-text uppercase mb-1">Otrebor</h1>
-                        <p className="text-muted-foreground font-black tracking-[0.5em] text-[10px] uppercase opacity-40">Intelligence & Defense</p>
+                        <h1 className="text-6xl font-bold gold-text uppercase mb-2">Otrebor</h1>
+                        <p className="text-muted-foreground font-semibold tracking-widest text-xs uppercase opacity-60">Intelligence & Defense</p>
                     </div>
                 </div>
 
@@ -168,13 +168,13 @@ const Login = () => {
                         <div className="flex border-b border-white/5">
                             <button
                                 onClick={() => setMode('login')}
-                                className={`flex-1 py-5 text-[11px] font-black uppercase tracking-[0.3em] transition-all ${mode === 'login' ? 'text-primary' : 'text-muted-foreground hover:text-white'}`}
+                                className={`flex-1 py-5 text-sm font-bold uppercase tracking-wider transition-all ${mode === 'login' ? 'text-primary' : 'text-muted-foreground hover:text-white'}`}
                             >
                                 Login
                             </button>
                             <button
                                 onClick={() => setMode('register')}
-                                className={`flex-1 py-5 text-[11px] font-black uppercase tracking-[0.3em] transition-all ${mode === 'register' ? 'text-primary' : 'text-muted-foreground hover:text-white'}`}
+                                className={`flex-1 py-5 text-sm font-bold uppercase tracking-wider transition-all ${mode === 'register' ? 'text-primary' : 'text-muted-foreground hover:text-white'}`}
                             >
                                 Cadastro
                             </button>
@@ -184,8 +184,8 @@ const Login = () => {
                             {mode === 'login' ? (
                                 <div className="space-y-8">
                                     <div className="text-center space-y-2">
-                                        <CardTitle className="text-3xl font-black">Autenticação Neural</CardTitle>
-                                        <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Posicione-se diante do sensor biométrico</CardDescription>
+                                        <CardTitle className="text-3xl font-bold">Autenticação</CardTitle>
+                                        <CardDescription className="text-sm font-medium text-muted-foreground">Posicione-se diante do sensor biométrico</CardDescription>
                                     </div>
 
                                     <div className="space-y-6">
@@ -217,28 +217,28 @@ const Login = () => {
                                             <Button
                                                 onClick={startCamera}
                                                 disabled={isProcessing}
-                                                className="h-32 w-full rounded-[32px] bg-primary text-black hover:bg-primary/90 transition-all duration-500 font-black text-xs uppercase tracking-[0.3em] flex flex-col gap-2 group shadow-[0_15px_40px_rgba(191,149,63,0.3)]"
+                                                className="h-32 w-full rounded-[32px] bg-primary text-black hover:bg-primary/90 transition-all duration-500 font-bold text-sm uppercase tracking-wider flex flex-col gap-2 group shadow-[0_15px_40px_rgba(191,149,63,0.3)]"
                                             >
-                                                <Camera className="w-10 h-10 group-hover:scale-125 transition-transform duration-500" />
+                                                <Camera className="w-10 h-10 group-hover:scale-110 transition-transform duration-500" />
                                                 Ativar Scanner de Face
                                             </Button>
                                         )}
                                     </div>
 
-                                    <p className="text-[10px] text-center font-black uppercase tracking-[0.2em] text-muted-foreground/40 italic">
+                                    <p className="text-xs text-center font-medium text-muted-foreground/60 italic">
                                         "Seu rosto é sua chave mestre no ecossistema OTREBOR"
                                     </p>
                                 </div>
                             ) : (
                                 <form onSubmit={handleRegister} className="space-y-8">
                                     <div className="text-center space-y-2">
-                                        <CardTitle className="text-3xl font-black">Nova Identidade</CardTitle>
-                                        <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Siga o protocolo para liberar seu acesso</CardDescription>
+                                        <CardTitle className="text-3xl font-bold">Nova Identidade</CardTitle>
+                                        <CardDescription className="text-sm font-medium text-muted-foreground">Siga o protocolo para liberar seu acesso</CardDescription>
                                     </div>
 
                                     <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-3">Nome Completo</Label>
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-primary/70 ml-3">Nome Completo</Label>
                                             <div className="relative">
                                                 <User className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                                                 <Input
@@ -252,7 +252,7 @@ const Login = () => {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-3">E-mail Corporativo</Label>
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-primary/70 ml-3">E-mail Corporativo</Label>
                                             <div className="relative">
                                                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                                                 <Input
@@ -267,7 +267,7 @@ const Login = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/50 ml-3">Reconhecimento Facial</Label>
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-primary/70 ml-3">Reconhecimento Facial</Label>
 
                                             {showCamera ? (
                                                 <div className="relative aspect-video rounded-[32px] overflow-hidden border-2 border-primary/30 bg-black">
@@ -292,12 +292,12 @@ const Login = () => {
                                                     {faceDescriptor ? (
                                                         <>
                                                             <ScanFace className="w-10 h-10 text-primary" />
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Biometria Pronta</span>
+                                                            <span className="text-xs font-bold uppercase tracking-wider text-primary">Biometria Pronta</span>
                                                         </>
                                                     ) : (
                                                         <>
                                                             <Camera className="w-10 h-10 text-white/20 group-hover:text-primary transition-colors" />
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ativar Sensor de Face</span>
+                                                            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ativar Sensor de Face</span>
                                                         </>
                                                     )}
                                                 </Button>
@@ -319,8 +319,8 @@ const Login = () => {
                     </Card>
                 </div>
 
-                <p className="text-[10px] text-center font-black uppercase tracking-[0.4em] text-muted-foreground/30 px-10 leading-loose">
-                    Processado via Motor Biométrico OTREBOR. Criptografia ponta-a-ponta ativada.
+                <p className="text-xs text-center font-medium text-muted-foreground/50 px-10 leading-relaxed">
+                    © 2026 OTREBOR. O acesso a este sistema é restrito. Criptografia ponta-a-ponta ativada.
                 </p>
             </div>
 
@@ -329,10 +329,10 @@ const Login = () => {
                 .btn-premium {
                     background: var(--gold-gradient);
                     color: black;
-                    font-weight: 900;
+                    font-weight: 700;
                     text-transform: uppercase;
-                    letter-spacing: 0.2em;
-                    font-size: 0.75rem;
+                    letter-spacing: 0.1em;
+                    font-size: 0.875rem;
                     box-shadow: 0 10px 40px rgba(191,149,63,0.3);
                     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
                 }
