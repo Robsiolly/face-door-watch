@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, CheckCircle2 } from "lucide-react";
 import { useAppData, Ocorrencia } from "@/contexts/AppDataContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
@@ -188,10 +188,10 @@ const Ocorrencias = () => {
               <Input value={formData.data || ""} onChange={e => setFormData({ ...formData, data: e.target.value })} />
             </div>
           </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </div>
+          <DialogFooter className="mt-8 gap-3">
+            <Button variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl flex-1">Cancelar</Button>
+            <Button onClick={handleSave} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 flex-1">Salvar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AppLayout>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, ScanFace, CheckCircle2, ShieldAlert, Camera, Settings } from "lucide-react";
@@ -253,14 +253,14 @@ export function AccessControlModal({ isOpen, onClose, allowedTypes }: AccessCont
                             {foundPerson.autorizadoPor && <div><span className="text-muted-foreground">Liberado por:</span> {foundPerson.autorizadoPor}</div>}
                         </div>
 
-                        <div className="flex gap-3 pt-3">
-                            <Button onClick={handleLiberar} className="flex-1 bg-green-600 hover:bg-green-700 text-white gap-2">
+                        <DialogFooter className="flex gap-3 pt-3">
+                            <Button onClick={handleLiberar} className="flex-1 bg-green-600 hover:bg-green-700 text-white gap-2 rounded-xl">
                                 <CheckCircle2 className="w-4 h-4" /> Liberar Acesso
                             </Button>
-                            <Button variant="outline" onClick={() => setFoundPerson(null)} className="border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-600 gap-2">
+                            <Button variant="outline" onClick={() => setFoundPerson(null)} className="flex-1 border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-600 gap-2 rounded-xl">
                                 <ShieldAlert className="w-4 h-4" /> Negar
                             </Button>
-                        </div>
+                        </DialogFooter>
                     </div>
                 )}
             </DialogContent>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, PackageCheck, MessageCircle, Check, Phone } from "lucide-react";
 import { useAppData, Encomenda } from "@/contexts/AppDataContext";
 import { usePeople } from "@/contexts/PeopleContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
@@ -294,17 +294,17 @@ const Encomendas = () => {
               <Input value={formData.dataRecebimento || ""} onChange={e => setFormData({ ...formData, dataRecebimento: e.target.value })} />
             </div>
           </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
+          <DialogFooter className="mt-8 gap-3">
+            <Button variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl flex-1">Cancelar</Button>
             <Button
               variant="outline"
-              className="text-primary border-primary/20 hover:bg-primary/10 gap-2"
+              className="text-primary border-primary/20 hover:bg-primary/10 gap-2 rounded-xl flex-1"
               onClick={() => sendWhatsApp(formData as Encomenda)}
             >
-              <MessageCircle className="w-4 h-4" /> Notificar WhatsApp
+              <MessageCircle className="w-4 h-4" /> WhatsApp
             </Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </div>
+            <Button onClick={handleSave} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 flex-1">Salvar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AppLayout>

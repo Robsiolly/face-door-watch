@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -237,9 +237,9 @@ export function RegistrationModal({ isOpen, onClose, type, personToEdit }: Regis
                 {step === 1 ? (
                     <>
                         {renderFields()}
-                        <div className="mt-4 flex justify-end">
-                            <Button onClick={handleNext}>Avançar para Biometria</Button>
-                        </div>
+                        <DialogFooter className="mt-6">
+                            <Button onClick={handleNext} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8">Avançar para Biometria</Button>
+                        </DialogFooter>
                     </>
                 ) : (
                     <div className="space-y-6">
@@ -311,20 +311,20 @@ export function RegistrationModal({ isOpen, onClose, type, personToEdit }: Regis
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-between">
-                            <Button variant="outline" onClick={() => setStep(1)}>Voltar</Button>
-                            <div className="space-x-2">
+                        <DialogFooter className="mt-8 justify-between sm:justify-between items-center">
+                            <Button variant="outline" onClick={() => setStep(1)} className="rounded-xl">Voltar</Button>
+                            <div className="flex gap-2">
                                 {!faceCaptured && (
                                     <Button
                                         variant="secondary"
                                         disabled={!stream || isProcessing}
+                                        className="rounded-xl font-bold"
                                         onClick={async () => {
                                             if (!videoRef.current) return;
                                             setIsProcessing(true);
                                             try {
                                                 const descriptor = await getFaceDescriptor(videoRef.current);
                                                 if (descriptor) {
-                                                    // Capture the photo as well
                                                     const canvas = document.createElement("canvas");
                                                     canvas.width = videoRef.current.videoWidth;
                                                     canvas.height = videoRef.current.videoHeight;
@@ -333,13 +333,12 @@ export function RegistrationModal({ isOpen, onClose, type, personToEdit }: Regis
                                                         ctx.drawImage(videoRef.current, 0, 0);
                                                         setCapturedPhoto(canvas.toDataURL("image/jpeg", 0.8));
                                                     }
-
                                                     setFaceDescriptor(descriptor as number[]);
                                                     setFaceCaptured(true);
                                                     stopCamera();
                                                     toast({ title: "Sucesso", description: "Biometria facial capturada." });
                                                 } else {
-                                                    toast({ title: "Erro", description: "Rosto não detectado. Tente novamente.", variant: "destructive" });
+                                                    toast({ title: "Erro", description: "Rosto não detectado.", variant: "destructive" });
                                                 }
                                             } catch (err) {
                                                 toast({ title: "Erro", description: "Falha no processamento.", variant: "destructive" });
@@ -348,14 +347,14 @@ export function RegistrationModal({ isOpen, onClose, type, personToEdit }: Regis
                                             }
                                         }}
                                     >
-                                        {isProcessing ? "Processando..." : "Capturar"}
+                                        {isProcessing ? "Lendo..." : "Capturar Face"}
                                     </Button>
                                 )}
-                                <Button onClick={handleSave} disabled={!faceCaptured} className="gap-2">
-                                    <Save className="h-4 w-4" /> Salvar
+                                <Button onClick={handleSave} disabled={!faceCaptured} className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 gap-2">
+                                    <Save className="h-4 w-4" /> Salvar Cadastro
                                 </Button>
                             </div>
-                        </div>
+                        </DialogFooter>
                     </div>
                 )}
             </DialogContent>
